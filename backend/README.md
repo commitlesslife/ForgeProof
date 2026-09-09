@@ -1,10 +1,12 @@
 ---
 title: ForgeProof API
-emoji: ???
+emoji: 🛡️
 colorFrom: blue
 colorTo: red
-sdk: docker
-app_port: 7860
+sdk: gradio
+sdk_version: 4.44.0
+app_file: space_app.py
+pinned: false
 ---
 
 # ForgeProof AI Backend
