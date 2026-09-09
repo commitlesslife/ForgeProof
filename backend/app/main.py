@@ -70,6 +70,16 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 # =============================================================================
 # Health & Status Endpoint
 # =============================================================================
+@app.get("/")
+def root():
+    return {
+        "service": "ForgeProof AI Border Screening Engine",
+        "status": "ONLINE",
+        "version": "2.1.0-SIH26",
+        "docs": "/docs",
+        "health": "/api/v1/health"
+    }
+
 @app.get("/api/v1/health")
 def health_check():
     """System liveness, readiness, and capability probe."""

@@ -44,20 +44,27 @@ WORKDIR /app
 # Copy application source code
 COPY . /app
 
-# Create static asset subdirectories
-RUN mkdir -p /app/static/uploads /app/static/forensics /app/static/faces /app/static/samples
+# Create static directories, database directory, and set permissions for Hugging Face Spaces (user 1000)
+RUN useradd -m -u 1000 user && \
+    mkdir -p /app/static/uploads /app/static/forensics /app/static/faces /app/static/samples /app/data && \
+    chown -R user:user /app && \
+    chmod -R 777 /app
+
+USER user
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8000 \
-    HOST=0.0.0.0
+    PORT=7860 \
+    HOST=0.0.0.0 \
+    HOME=/home/user
 
+EXPOSE 7860
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')" || exit 1
+    CMD python -c "import urllib.request, os; urllib.request.urlopen(f'http://localhost:{os.getenv(\"PORT\", 7860)}/api/v1/health')" || exit 1
 
-# Launch production server with multi-worker Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Launch production server with dynamic port support (defaults to 7860 on Hugging Face Spaces, 8000 elsewhere)
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
