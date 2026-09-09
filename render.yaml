@@ -4,17 +4,11 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
+    plan: free
+    region: oregon
     envVars:
-      - key: PORT
-        value: 8000
-      - key: HOST
-        value: 0.0.0.0
       - key: DEBUG
         value: "False"
       - key: DATABASE_URL
         value: sqlite:////app/data/forgeproof.db
-    disk:
-      name: forgeproof-data
-      mountPath: /app/data
-      sizeGB: 1
+
