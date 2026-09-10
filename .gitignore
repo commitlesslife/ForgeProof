@@ -56,3 +56,5 @@ Thumbs.db
 *.zip
 temp_*.txt
 liquid-glass-ref/
+cloudflared.exe
+

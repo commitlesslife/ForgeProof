@@ -270,20 +270,59 @@ def extract_document_fields_real(doc_path: str, doc_type: str) -> Dict[str, Any]
             gender_match = re.search(r'\b(Male|Female|Transgender)\b', full_text, re.IGNORECASE)
             gender = gender_match.group(0).capitalize() if gender_match else "Unreadable"
 
-            # Name extraction: line before DOB/Year/Gender that isn't government text or pure digits
-            name = "Unreadable"
-            for i, line in enumerate(raw_lines):
-                if any(k in line.upper() for k in ["DOB", "YEAR", "MALE", "FEMALE"]):
-                    for j in range(i - 1, -1, -1):
-                        cand = raw_lines[j].strip()
-                        if (
-                            cand and len(cand) >= 3 and 
-                            not any(c.isdigit() for c in cand) and
-                            not any(ex in cand.upper() for ex in ["GOVERNMENT", "INDIA", "UIDAI", "ENROLMENT", "HELP"])
-                        ):
-                            name = cand
-                            break
+            # Name extraction: anchor on DOB line and search candidate lines strictly above it
+            dob_idx = -1
+            for idx, line in enumerate(raw_lines):
+                if (
+                    re.search(r'\b\d{2}/\d{2}/\d{4}\b', line) or
+                    any(k in line.upper() for k in ["DOB", "DATE OF BIRTH", "YEAR OF BIRTH", "YOB", "/ OB", "BIRTH"])
+                ):
+                    dob_idx = idx
                     break
+
+            search_lines = raw_lines[:dob_idx] if dob_idx != -1 else raw_lines
+            EXCLUDE_KEYWORDS = {
+                "GOVERNMENT", "INDIA", "UIDAI", "ENROLMENT", "HELP", "BHARAT",
+                "AADHAAR", "AUTHORITY", "UNIQUE", "IDENTIFICATION", "MERA", "PEHCHAN",
+                "STATE", "REPUBLIC", "ISSUE", "DATE"
+            }
+
+            scored_candidates = []
+            for line in search_lines:
+                cand = line.strip()
+                if not cand or any(c.isdigit() for c in cand):
+                    continue
+
+                clean_cand = re.sub(r'[^a-zA-Z\s]', '', cand).strip()
+                if len(clean_cand) < 3:
+                    continue
+
+                upper_cand = clean_cand.upper()
+                if any(ex in upper_cand for ex in EXCLUDE_KEYWORDS):
+                    continue
+
+                words = [w for w in clean_cand.split() if len(w) >= 2]
+                if not words:
+                    continue
+
+                score = 0
+                if len(words) >= 2:
+                    score += 15
+                elif len(words) == 1 and len(words[0]) >= 4:
+                    score += 5
+
+                if cand.istitle() or cand.isupper():
+                    score += 5
+
+                if any(v in clean_cand.lower() for v in "aeiou"):
+                    score += 3
+
+                scored_candidates.append((score, clean_cand))
+
+            name = "Unreadable"
+            if scored_candidates:
+                scored_candidates.sort(key=lambda x: x[0], reverse=True)
+                name = scored_candidates[0][1]
 
             return {
                 "doc_number": doc_num,
