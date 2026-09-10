@@ -18,13 +18,16 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
   const [facingMode, setFacingMode] = useState('environment') // 'environment' (rear) for doc, 'user' (selfie) for face
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingPhase, setProcessingPhase] = useState('')
+  const [cameraUnavailable, setCameraUnavailable] = useState(false)
 
   const videoRef = useRef(null)
   const streamRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   // WebCam utilities with rear/front support
   const startCamera = async (mode) => {
     stopCamera()
+    setCameraUnavailable(false)
     const targetMode = mode || facingMode
     try {
       const constraints = {
@@ -49,6 +52,7 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
         streamRef.current = fallbackStream
       } catch (fallbackErr) {
         console.error("Camera access completely failed:", fallbackErr)
+        setCameraUnavailable(true)
       }
     }
   }
@@ -93,19 +97,31 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
 
   const handleFileUpload = (e, type) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const previewUrl = URL.createObjectURL(file)
-      if (type === 'doc') {
-        setDocImage({ file, previewUrl })
-        setStep(3)
-      } else {
-        setFaceImage({ file, previewUrl })
-        submitCase(file)
-      }
+    if (!file) return
+    
+    // Reset file input so selecting the same file again triggers onChange
+    e.target.value = ''
+    
+    const previewUrl = URL.createObjectURL(file)
+    stopCamera()
+
+    if (type === 'doc') {
+      setDocImage({ file, previewUrl })
+      setStep(3)
+    } else {
+      setFaceImage({ file, previewUrl })
+      submitCase(file, docImage?.file)
     }
   }
 
-  const submitCase = async (finalFaceFile) => {
+  const submitCase = async (finalFaceFile, currentDocFile = null) => {
+    const activeDocFile = currentDocFile || docImage?.file
+    if (!activeDocFile) {
+      alert("Document file missing. Please scan or upload an ID document first.")
+      setStep(2)
+      return
+    }
+
     setStep(4)
     setIsProcessing(true)
     
@@ -133,7 +149,7 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
     try {
       const formData = new FormData()
       formData.append('doc_type', docType)
-      formData.append('doc_file', docImage.file)
+      formData.append('doc_file', activeDocFile)
       formData.append('live_file', finalFaceFile)
 
       const response = await fetch(`${API_BASE}/api/v1/cases/screen`, {
@@ -141,20 +157,23 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
         body: formData
       })
 
-      if (!response.ok) throw new Error('API request failed')
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}))
+        throw new Error(errJson.detail || `Server error (${response.status})`)
+      }
       
       const data = await response.json()
       
-      // Ensure we wait at least 7 seconds total for effect
+      // Ensure we wait at least 6 seconds total for smooth transition
       setTimeout(() => {
         clearInterval(phaseInterval)
         onComplete(data.case_id)
-      }, Math.max(0, 7000 - (phaseIndex * 1200)))
+      }, Math.max(0, 6000 - (phaseIndex * 1200)))
 
     } catch (error) {
-      console.error(error)
+      console.error("Screening error:", error)
       clearInterval(phaseInterval)
-      alert("Error processing case. Ensure backend is running.")
+      alert(`Error processing case: ${error.message || 'Ensure backend is running.'}`)
       setStep(1)
       setIsProcessing(false)
     }
@@ -229,6 +248,13 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
                 {step === 2 ? 'Position the document clearly in the frame.' : 'Look directly at the camera.'}
               </p>
 
+              {step === 3 && docImage && (
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-300 px-3.5 py-1 text-xs font-semibold text-emerald-800 shadow-xs">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>Document loaded: {docImage.file.name || 'Captured Document'}</span>
+                </div>
+              )}
+
               <div className="relative mx-auto max-w-lg aspect-[4/3] sm:aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white/80">
                 <video 
                   ref={videoRef} 
@@ -250,25 +276,56 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
                   <SwitchCamera size={14} className="text-white" />
                   <span className="text-[11px]">{facingMode === 'environment' ? 'Rear' : 'Front'}</span>
                 </button>
+
+                {/* Camera Unavailable Overlay */}
+                {cameraUnavailable && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-900/90 text-white text-center z-10 animate-fade-in-up">
+                    <div className="size-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3">
+                      <Camera size={24} />
+                    </div>
+                    <h3 className="font-bold text-sm sm:text-base">Camera Not Available</h3>
+                    <p className="text-xs text-slate-300 mt-1 max-w-xs leading-relaxed">
+                      Camera access was denied or no device is connected. Please use the button below to upload an image from your device.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white text-[#0B477A] px-4 py-2 font-bold text-xs hover:bg-slate-100 transition cursor-pointer active:scale-95 shadow-md"
+                    >
+                      <Upload size={14} /> Upload {step === 2 ? 'Document Image' : 'Face Photo'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 max-w-sm sm:max-w-none mx-auto">
                 <button
+                  type="button"
                   onClick={captureImage}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#D30B0D] hover:bg-[#B3090B] px-6 py-3.5 sm:py-3 font-bold text-white transition hover:-translate-y-0.5 active:scale-98 cursor-pointer shadow-md shadow-[#D30B0D]/25"
+                  disabled={cameraUnavailable}
+                  className={`flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 sm:py-3 font-bold text-white transition hover:-translate-y-0.5 active:scale-98 cursor-pointer shadow-md ${
+                    cameraUnavailable
+                      ? 'bg-slate-400 opacity-50 cursor-not-allowed shadow-none'
+                      : 'bg-[#D30B0D] hover:bg-[#B3090B] shadow-[#D30B0D]/25'
+                  }`}
                 >
                   <Camera size={20} /> Capture Now
                 </button>
                 
-                <div className="relative w-full sm:w-auto">
+                <div className="w-full sm:w-auto">
                   <input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleFileUpload(e, step === 2 ? 'doc' : 'face')}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="hidden"
                   />
-                  <button className="w-full flex items-center justify-center gap-2 rounded-xl glass-card px-6 py-3.5 sm:py-3 font-bold text-[#0B477A] transition hover:bg-white border border-white/80 cursor-pointer shadow-xs active:scale-98">
-                    <Upload size={20} /> Upload File
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl glass-card px-6 py-3.5 sm:py-3 font-bold text-[#0B477A] transition hover:bg-white border border-white/80 cursor-pointer shadow-xs active:scale-98"
+                  >
+                    <Upload size={20} /> Upload {step === 2 ? 'Document' : 'Face Photo'}
                   </button>
                 </div>
               </div>

@@ -31,7 +31,7 @@ DEFAULT_DB_PATH = (BASE_DIR / "forgeproof.db").as_posix()
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
 
 # Image preprocessing thresholds
-MAX_IMAGE_DIMENSION = int(os.getenv("MAX_IMAGE_DIMENSION", "1600")) # High fidelity for accuracy
+MAX_IMAGE_DIMENSION = int(os.getenv("MAX_IMAGE_DIMENSION", "1024")) # Optimized for memory efficiency & high accuracy
 IMAGE_JPEG_QUALITY = int(os.getenv("IMAGE_JPEG_QUALITY", "94"))
 
 # Quality Gate thresholds

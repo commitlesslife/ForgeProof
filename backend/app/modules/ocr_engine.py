@@ -237,7 +237,15 @@ def extract_document_fields_real(doc_path: str, doc_type: str) -> Dict[str, Any]
         }
 
     try:
-        result = reader.readtext(doc_path, detail=0)
+        import gc
+        try:
+            import torch
+            with torch.no_grad():
+                result = reader.readtext(doc_path, detail=0, paragraph=False)
+        except Exception:
+            result = reader.readtext(doc_path, detail=0, paragraph=False)
+        gc.collect()
+
         full_text = " ".join(result)
         raw_lines = [r.strip() for r in result if r.strip()]
 
