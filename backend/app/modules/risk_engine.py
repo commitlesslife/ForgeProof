@@ -5,7 +5,7 @@ Aggregates sub-scores from Validation, Tampering Detection, Face Verification,
 and Metadata Forensics into an explainable, evidence-backed composite risk score.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from app.config import RISK_WEIGHTS, RISK_LOW_CEILING, RISK_MEDIUM_CEILING
 
 
