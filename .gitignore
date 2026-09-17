@@ -1,10 +1,12 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
+frontend-gov/node_modules/
 
 # Production Builds
 dist/
 frontend/dist/
+frontend-gov/dist/
 
 # Python runtime & caches
 __pycache__/
@@ -54,7 +56,8 @@ Thumbs.db
 
 # Temporary reference files
 *.zip
+ref/*.zip
 temp_*.txt
-liquid-glass-ref/
+ref/liquid-glass-ref/
 cloudflared.exe
 

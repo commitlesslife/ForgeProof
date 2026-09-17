@@ -34,6 +34,8 @@ from app.modules.validation_engine import (
 from app.modules.tampering_engine import run_comprehensive_forensics
 from app.modules.face_engine import verify_faces
 from app.modules.risk_engine import compute_composite_risk
+from app.modules.qr_engine import extract_and_verify_qr
+from app.modules.watchlist_engine import screen_against_watchlist
 from app.storage.audit_ledger import audit_ledger
 from app.storage.case_store import case_store
 
@@ -41,6 +43,7 @@ from app.storage.case_store import case_store
 def process_screening_pipeline(
     doc_path: str,
     live_path: Optional[str] = None,
+    doc_back_path: Optional[str] = None,
     doc_type: str = "PASSPORT",
     case_id: Optional[str] = None,
     custom_viz: Optional[Dict[str, Any]] = None,
@@ -51,8 +54,9 @@ def process_screening_pipeline(
     Production Screening Pipeline: 100% dynamic without mock overrides.
     Executes image preprocessing, quality gating, OpenCV tampering forensics,
     1:1 facial biometric verification, dynamic EasyOCR extraction, mathematical
-    checksum validation (UIDAI Verhoeff, ICAO 7-3-1, ITD PAN, MoRTH DL), and
-    evidence-backed risk explainability.
+    checksum validation (UIDAI Verhoeff, ICAO 7-3-1, ITD PAN, MoRTH DL),
+    2D Barcode / QR code cross-verification, Interpol watchlist screening,
+    and evidence-backed risk explainability.
     """
     case_id = case_id or f"CASE_{uuid.uuid4().hex[:8].upper()}"
 
@@ -60,6 +64,8 @@ def process_screening_pipeline(
     preprocess_image(doc_path)
     if live_path and os.path.exists(live_path):
         preprocess_image(live_path)
+    if doc_back_path and os.path.exists(doc_back_path):
+        preprocess_image(doc_back_path)
 
     # Step 2: Quality Gate
     quality_res = evaluate_image_quality(doc_path)
@@ -196,6 +202,23 @@ def process_screening_pipeline(
             "cross_validation": cross_res
         }
 
+    # Step 6b: 2D Barcode & QR Code Cross-Verification (Front & Backside)
+    viz_fields_data = validation_res.get("viz_fields", {})
+    qr_res = extract_and_verify_qr(doc_path, doc_back_path, viz_fields_data)
+    validation_res["qr_code"] = qr_res
+    validation_res["qr_verification"] = qr_res
+
+    # Step 6c: Simulated Interpol Red Notice & Law Enforcement Watchlist Screening
+    doc_num_val = viz_fields_data.get("doc_number")
+    name_val = viz_fields_data.get("full_name")
+    dob_val = viz_fields_data.get("dob")
+    watchlist_res = screen_against_watchlist(
+        doc_number=doc_num_val,
+        full_name=name_val,
+        dob=dob_val
+    )
+    validation_res["watchlist"] = watchlist_res
+
     # Step 7: Risk Scoring & Plain-English Explainability (Module 5)
     metadata_res = tampering_res.get("metadata", {"metadata_risk": 0.0, "flags": []})
     risk_res = compute_composite_risk(validation_res, tampering_res, face_res, metadata_res)
@@ -205,6 +228,7 @@ def process_screening_pipeline(
     live_folder = "uploads" if (live_path and "uploads" in live_path.replace("\\", "/")) else "samples"
 
     doc_image_url = f"/static/{doc_folder}/{os.path.basename(doc_path)}"
+    doc_back_image_url = f"/static/{doc_folder}/{os.path.basename(doc_back_path)}" if (doc_back_path and os.path.exists(doc_back_path)) else None
     live_image_url = f"/static/{live_folder}/{os.path.basename(live_path)}" if (live_path and os.path.exists(live_path)) else None
 
     # Fallback URLs for face crops
@@ -228,6 +252,7 @@ def process_screening_pipeline(
         "case_id": case_id,
         "doc_type": doc_type,
         "doc_image_url": doc_image_url,
+        "doc_back_image_url": doc_back_image_url,
         "live_image_url": live_image_url,
         "quality_gate": quality_res,
         "validation": validation_res,

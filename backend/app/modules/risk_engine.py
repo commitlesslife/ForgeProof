@@ -67,6 +67,23 @@ def compute_composite_risk(
                     "detail": f"The card number failed official {indian_val.get('checksum_type', 'verification')} rules and is not a genuine government-issued identity."
                 })
 
+    # 2D Barcode & QR Code Discrepancy Check
+    qr_data = validation_res.get("qr_code")
+    if qr_data and qr_data.get("detected"):
+        if qr_data.get("tampering_detected"):
+            val_risk += 80.0
+            val_evidence.append({
+                "severity": "CRITICAL",
+                "title": "QR Code vs. Printed Data Discrepancy",
+                "detail": f"The embedded QR code payload contradicts the printed cardholder information: {qr_data.get('detail')}. This indicates cosmetic text alteration."
+            })
+        else:
+            val_evidence.append({
+                "severity": "INFO",
+                "title": "Digital Barcode Verified",
+                "detail": f"2D Barcode detected on {qr_data.get('qr_location')} of document. Encoded data matches physical cardholder fields."
+            })
+
     val_risk = min(100.0, val_risk)
 
     # -------------------------------------------------------------------------
@@ -151,23 +168,37 @@ def compute_composite_risk(
 
     composite_score = round(min(100.0, max(0.0, composite_score)), 1)
 
+    all_evidence = val_evidence + tamp_evidence + face_evidence + meta_evidence
+
     # -------------------------------------------------------------------------
-    # 6. Risk Tier Classification & Recommendation
+    # 6. Law Enforcement Watchlist & Interpol Hit Override
     # -------------------------------------------------------------------------
-    if composite_score <= RISK_LOW_CEILING:
-        risk_level = "LOW"
-        risk_color = "green"
-        recommendation = "Genuine Document — All security features, check digits, and facial match verified. Clear for entry."
-    elif composite_score <= RISK_MEDIUM_CEILING:
-        risk_level = "MEDIUM"
-        risk_color = "amber"
-        recommendation = "Secondary Review Advised — Moderate optical or layout anomalies detected. Officer physical inspection required."
-    else:
+    watchlist_data = validation_res.get("watchlist")
+    if watchlist_data and watchlist_data.get("is_hit"):
+        composite_score = 100.0
         risk_level = "HIGH"
         risk_color = "red"
-        recommendation = "High Risk / Fraud Suspected — Detain document and refer traveler to supervisor for secondary interrogation."
+        recommendation = f"🚨 {watchlist_data.get('notice_type')} HIT: {watchlist_data.get('offense')}. Directive: {watchlist_data.get('action_required')}."
+        all_evidence.insert(0, {
+            "severity": "CRITICAL",
+            "title": f"{watchlist_data.get('notice_type')} HIT ({watchlist_data.get('notice_id')})",
+            "detail": f"Matched: {', '.join(watchlist_data.get('matched_on', []))}. Issuing Agency: {watchlist_data.get('issuing_state')}. Directive: {watchlist_data.get('action_required')}."
+        })
+    else:
+        # Standard Risk Tier Classification & Recommendation
+        if composite_score <= RISK_LOW_CEILING:
+            risk_level = "LOW"
+            risk_color = "green"
+            recommendation = "Genuine Document — All security features, check digits, and facial match verified. Clear for entry."
+        elif composite_score <= RISK_MEDIUM_CEILING:
+            risk_level = "MEDIUM"
+            risk_color = "amber"
+            recommendation = "Secondary Review Advised — Moderate optical or layout anomalies detected. Officer physical inspection required."
+        else:
+            risk_level = "HIGH"
+            risk_color = "red"
+            recommendation = "High Risk / Fraud Suspected — Detain document and refer traveler to supervisor for secondary interrogation."
 
-    all_evidence = val_evidence + tamp_evidence + face_evidence + meta_evidence
     if not all_evidence:
         all_evidence.append({
             "severity": "INFO",
@@ -188,3 +219,4 @@ def compute_composite_risk(
         },
         "evidence_items": all_evidence
     }
+

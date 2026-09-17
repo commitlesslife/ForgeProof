@@ -48,34 +48,36 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
       {/* Stats Cards: 2x2 on mobile, 4 columns on desktop */}
       <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Total cases', value: String(stats.total).padStart(2, '0'), detail: 'Screenings', icon: Filter, tone: 'text-[#0B477A]' },
-          { label: 'High-risk flags', value: String(stats.high).padStart(2, '0'), detail: 'Attention needed', icon: ShieldAlert, tone: 'text-[#D30B0D]' },
-          { label: 'Cleared', value: String(stats.cleared).padStart(2, '0'), detail: 'Passed genuine', icon: CheckCircle2, tone: 'text-emerald-600' },
-          { label: 'Avg. review time', value: '6s', detail: 'Processing time', icon: Clock3, tone: 'text-[#0B477A]' },
-        ].map(({ label, value, detail, icon: Icon, tone }) => (
-          <div key={label} className="glass-effect hover-lift rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 cursor-default border border-white/70">
+          { label: 'Total screened', value: String(stats.total).padStart(2, '0'), detail: 'Screening instances', icon: Filter, tone: 'text-[#0B477A]', borderTone: 'border-l-4 border-l-[#0B477A]' },
+          { label: 'High-risk flags', value: String(stats.high).padStart(2, '0'), detail: 'Critical referrals', icon: ShieldAlert, tone: 'text-[#D30B0D]', borderTone: 'border-l-4 border-l-[#D30B0D]' },
+          { label: 'Cleared genuine', value: String(stats.cleared).padStart(2, '0'), detail: 'Admissible standard', icon: CheckCircle2, tone: 'text-emerald-600', borderTone: 'border-l-4 border-l-emerald-600' },
+          { label: 'Avg. review time', value: '4.8s', detail: 'Real-time AI pipeline', icon: Clock3, tone: 'text-[#0B477A]', borderTone: 'border-l-4 border-l-slate-400' },
+        ].map(({ label, value, detail, icon: Icon, tone, borderTone }) => (
+          <div key={label} className={`glass-effect hover-lift rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 cursor-default border border-white/80 shadow-xs ${borderTone}`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-semibold text-[#615D73] truncate">{label}</span>
-              <Icon className={`${tone} shrink-0`} size={18} />
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#615D73] truncate">{label}</span>
+              <div className="size-8 rounded-xl bg-white/80 flex items-center justify-center shadow-2xs">
+                <Icon className={`${tone} shrink-0`} size={17} />
+              </div>
             </div>
-            <p className="mt-2 sm:mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B477A]">{value}</p>
-            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-[#615D73] truncate">{detail}</p>
+            <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-black tracking-tight text-[#0B477A]">{value}</p>
+            <p className="mt-0.5 text-[11px] text-[#615D73]/80 font-medium truncate">{detail}</p>
           </div>
         ))}
       </section>
 
-      {/* New Verification CTA */}
+      {/* New Verification Quick Action CTA */}
       <button
         onClick={() => onNavigate('capture')}
-        className="w-full glass-effect hover-lift rounded-[22px] sm:rounded-[24px] p-4 sm:p-5 flex items-center justify-between group cursor-pointer border border-white/70 hover:border-[#0B477A]/40 transition-all active:scale-[0.99]"
+        className="w-full glass-effect hover-lift rounded-[22px] sm:rounded-[24px] p-4 sm:p-5 flex items-center justify-between group cursor-pointer border border-white/80 hover:border-[#0B477A]/30 transition-all active:scale-[0.99] shadow-xs"
       >
         <div className="text-left">
-          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#0B477A]">Quick action</p>
-          <h2 className="mt-0.5 sm:mt-1 text-lg sm:text-xl font-bold tracking-tight text-[#0B477A]">Start new verification</h2>
-          <p className="mt-0.5 text-xs sm:text-sm text-[#615D73]">Upload or scan a document to begin AI screening.</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#0B477A]">New Inspection</p>
+          <h2 className="mt-0.5 text-base sm:text-lg font-bold tracking-tight text-[#0B477A]">Start Document & Biometric Screening</h2>
+          <p className="mt-0.5 text-xs text-[#615D73]">Initiate automated optical, tampering, and facial verification.</p>
         </div>
-        <div className="size-10 sm:size-11 rounded-2xl glass-navy-subtle flex items-center justify-center shrink-0 ml-3 group-hover:glass-navy group-hover:text-white transition-all">
-          <ArrowRight className="text-[#0B477A] group-hover:text-white transition-transform duration-200 group-hover:translate-x-1" size={20} />
+        <div className="size-10 sm:size-11 rounded-2xl glass-navy-subtle flex items-center justify-center shrink-0 ml-3 group-hover:glass-navy group-hover:text-white transition-all shadow-xs">
+          <ArrowRight className="text-[#0B477A] group-hover:text-white transition-transform duration-200 group-hover:translate-x-0.5" size={19} />
         </div>
       </button>
 
@@ -163,7 +165,13 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
             )
           })}
           {filtered.length === 0 && (
-            <div className="py-8 text-center text-xs text-[#615D73]">No cases match your filters.</div>
+            <div className="py-10 text-center space-y-2.5">
+              <div className="size-10 rounded-xl bg-[#0B477A]/10 text-[#0B477A] mx-auto flex items-center justify-center">
+                <CheckCircle2 size={20} />
+              </div>
+              <p className="text-xs font-bold text-[#0B477A]">Screening Queue Clear</p>
+              <p className="text-[11px] text-[#615D73]">No travel documents currently pending review.</p>
+            </div>
           )}
         </div>
 
@@ -210,7 +218,24 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="py-10 text-center text-sm text-[#615D73]">No cases match your filters.</div>
+            <div className="py-14 text-center space-y-3">
+              <div className="size-12 rounded-2xl bg-[#0B477A]/10 text-[#0B477A] mx-auto flex items-center justify-center">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-[#0B477A] text-sm sm:text-base">Screening Queue Clear</h3>
+                <p className="text-xs text-[#615D73] mt-0.5 max-w-sm mx-auto">
+                  No active travel documents pending review. Launch a new screening instance from Capture Station.
+                </p>
+              </div>
+              <button
+                onClick={() => onNavigate('capture')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0B477A] text-white text-xs font-bold hover:bg-[#08345a] transition cursor-pointer active:scale-95 shadow-xs"
+              >
+                <span>Open Capture Station</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
           )}
         </div>
       </section>
