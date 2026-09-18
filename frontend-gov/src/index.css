@@ -10,14 +10,17 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    font-size: 14.5px;
   }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Noto Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #EDF2F7;
     color: #1E293B;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
   }
 }
 
@@ -34,6 +37,18 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* GIGW Official Government Typography Stacks */
+  .font-gov-serif {
+    font-family: 'Source Serif 4', 'Georgia', 'Times New Roman', serif;
+  }
+  .font-gov-sans {
+    font-family: 'Noto Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .font-gov-mono {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+    letter-spacing: -0.02em;
   }
 
   /* National Government Color Palette */

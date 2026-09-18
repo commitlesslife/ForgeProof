@@ -48,14 +48,14 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
       {/* Official Section Header */}
       <div className="flex items-center justify-between border-b-2 border-slate-300 pb-2.5">
         <div>
-          <h1 className="text-lg sm:text-xl font-black text-[#003366] uppercase tracking-tight flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold font-gov-serif text-[#003366] tracking-tight flex items-center gap-2">
             <span>{t('dashboard_title')}</span>
           </h1>
-          <p className="text-xs text-slate-600 mt-0.5">
+          <p className="text-xs text-slate-600 mt-0.5 font-gov-sans">
             {t('dashboard_sub')}
           </p>
         </div>
-        <div className="hidden md:flex items-center gap-2 font-mono text-[11px] bg-white px-3 py-1 rounded border border-slate-300">
+        <div className="hidden md:flex items-center gap-2 font-gov-mono text-[11px] bg-white px-3 py-1 rounded border border-slate-300">
           <span className="size-2 rounded-full bg-emerald-600 animate-pulse" />
           <span className="text-slate-700 font-bold">{t('system_status')}</span>
         </div>
@@ -97,17 +97,17 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
             borderTone: 'border-l-4 border-l-amber-500' 
           },
         ].map(({ label, sub, value, icon: Icon, tone, borderTone }) => (
-          <div key={label} className={`bg-white rounded-lg p-4 cursor-default border border-slate-300 shadow-xs ${borderTone}`}>
+          <div key={label} className={`bg-white rounded p-4 cursor-default border border-slate-300 shadow-xs ${borderTone}`}>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-slate-900 block">{label}</span>
-                <span className="text-[10px] font-mono text-slate-500">{sub}</span>
+                <span className="text-xs font-bold text-slate-900 block font-gov-sans">{label}</span>
+                <span className="text-[10px] font-gov-mono text-slate-500">{sub}</span>
               </div>
               <div className="size-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center">
                 <Icon className={`${tone} shrink-0`} size={17} />
               </div>
             </div>
-            <p className="mt-2 text-2xl sm:text-3xl font-mono font-black tracking-tight text-[#003366]">{value}</p>
+            <p className="mt-2 text-2xl sm:text-3xl font-gov-mono font-bold tracking-tight text-[#003366]">{value}</p>
           </div>
         ))}
       </section>
@@ -115,21 +115,21 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
       {/* Primary Inspection Quick Action CTA */}
       <button
         onClick={() => onNavigate('capture')}
-        className="w-full bg-white hover:bg-slate-50 rounded-lg p-4 sm:p-5 flex items-center justify-between group cursor-pointer border-2 border-[#003366] transition-all shadow-xs"
+        className="w-full bg-white hover:bg-slate-50 rounded p-4 sm:p-5 flex items-center justify-between group cursor-pointer border-2 border-[#003366] transition-all shadow-xs"
       >
         <div className="text-left">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-[#003366] bg-[#003366]/10 border border-[#003366]/30 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-gov-mono font-bold uppercase tracking-widest text-[#003366] bg-[#003366]/10 border border-[#003366]/30 px-2 py-0.5 rounded">
               {t('statutory_action')}
             </span>
-            <span className="text-[10px] font-mono text-emerald-800 font-bold hidden sm:inline">
+            <span className="text-[10px] font-gov-mono text-emerald-800 font-bold hidden sm:inline">
               ● {t('scanner_ready')}
             </span>
           </div>
-          <h2 className="mt-1 text-base sm:text-lg font-black tracking-tight text-[#003366]">
+          <h2 className="mt-1 text-base sm:text-lg font-bold font-gov-sans tracking-tight text-[#003366]">
             {t('new_screening_title')}
           </h2>
-          <p className="mt-0.5 text-xs text-slate-600 font-medium">
+          <p className="mt-0.5 text-xs text-slate-600 font-normal">
             {t('new_screening_sub')}
           </p>
         </div>
@@ -139,15 +139,15 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
       </button>
 
       {/* Case Queue */}
-      <section className="bg-white rounded-lg p-4 sm:p-6 border border-slate-300 shadow-xs">
+      <section className="bg-white rounded p-4 sm:p-6 border border-slate-300 shadow-xs">
         <div className="flex flex-col justify-between gap-3 sm:gap-4 md:flex-row md:items-end border-b border-slate-200 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-gov-mono font-bold uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded">
                 {t('restricted_record')}
               </span>
             </div>
-            <h2 className="mt-1 text-base sm:text-lg font-black tracking-tight text-[#003366]">
+            <h2 className="mt-1 text-lg sm:text-xl font-bold font-gov-serif tracking-tight text-[#003366]">
               {t('queue_title')}
             </h2>
             <p className="mt-0.5 text-xs text-slate-600">
@@ -243,14 +243,14 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
         {/* Desktop View: Full Data Table (>= md) */}
         <div className="mt-6 hidden md:block overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-xs border border-slate-300 rounded overflow-hidden">
-            <thead className="bg-[#003366] text-white text-[10px] uppercase font-mono tracking-wider">
+            <thead className="bg-[#003366] text-white text-[11px] uppercase font-gov-sans font-bold tracking-wider">
               <tr>
-                <th className="py-2.5 px-3 font-bold">{t('col_dossier')}</th>
-                <th className="py-2.5 px-3 font-bold">{t('col_subject')}</th>
-                <th className="py-2.5 px-3 font-bold">{t('col_classification')}</th>
-                <th className="py-2.5 px-3 font-bold">{t('col_risk')}</th>
-                <th className="py-2.5 px-3 font-bold">{t('col_status')}</th>
-                <th className="py-2.5 px-3 font-bold text-right">{t('col_action')}</th>
+                <th className="py-2.5 px-3">{t('col_dossier')}</th>
+                <th className="py-2.5 px-3">{t('col_subject')}</th>
+                <th className="py-2.5 px-3">{t('col_classification')}</th>
+                <th className="py-2.5 px-3">{t('col_risk')}</th>
+                <th className="py-2.5 px-3">{t('col_status')}</th>
+                <th className="py-2.5 px-3 text-right">{t('col_action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 bg-white">
@@ -258,25 +258,25 @@ export default function OverviewPage({ cases, onViewCase, onNavigate }) {
                 const riskLvl = (item.risk_assessment?.risk_level || item.risk_level || 'LOW').toUpperCase()
                 return (
                   <tr key={item.case_id} className="group hover:bg-slate-50 transition">
-                    <td className="py-3 px-3 font-mono text-xs font-black text-[#003366]">
+                    <td className="py-3 px-3 font-gov-mono text-xs font-bold text-[#003366]">
                       <span className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded">
                         {item.case_id}
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <p className="font-bold text-xs text-[#003366]">{item.validation?.viz_fields?.full_name || item.holder_name || 'Unknown Subject'}</p>
-                      <p className="text-[10px] font-mono text-slate-500 uppercase">{item.doc_type || 'Document'}</p>
+                      <p className="font-bold text-xs text-[#003366] font-gov-sans">{item.validation?.viz_fields?.full_name || item.holder_name || 'Unknown Subject'}</p>
+                      <p className="text-[10px] font-gov-mono text-slate-500 uppercase">{item.doc_type || 'Document'}</p>
                     </td>
                     <td className="py-3 px-3">
-                      <span className={`rounded px-2 py-0.5 text-[10px] font-mono font-black uppercase border ${riskStyles[riskLvl] || riskStyles.LOW}`}>
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-gov-mono font-bold uppercase border ${riskStyles[riskLvl] || riskStyles.LOW}`}>
                         {riskLvl}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-mono text-xs font-black text-[#003366]">
+                    <td className="py-3 px-3 font-gov-mono text-xs font-bold text-[#003366]">
                       {item.risk_assessment?.composite_score ?? item.composite_risk_score ?? '—'}%
                     </td>
                     <td className="py-3 px-3">
-                      <span className={`text-[11px] font-bold ${item.officer_decision ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      <span className={`text-[11px] font-gov-sans font-bold ${item.officer_decision ? 'text-emerald-700' : 'text-amber-700'}`}>
                         {item.officer_decision ? t('adjudicated') : t('pending_review')}
                       </span>
                     </td>

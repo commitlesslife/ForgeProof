@@ -214,23 +214,23 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
             <AshokaEmblem className="h-14 sm:h-16 shrink-0" />
             
             <div className="border-l-2 border-slate-300 pl-3.5 sm:pl-4">
-              <div className="text-[11px] sm:text-xs font-bold text-[#003366] tracking-wide leading-tight flex items-center gap-2">
-                <span>{lang === 'hi' ? 'भारत सरकार' : 'GOVERNMENT OF INDIA'}</span>
+              <div className="text-[11px] sm:text-xs font-semibold text-[#003366] tracking-wide leading-tight flex items-center gap-2">
+                <span className="font-bold">{lang === 'hi' ? 'भारत सरकार' : 'GOVERNMENT OF INDIA'}</span>
                 <span className="text-slate-400 font-normal">|</span>
-                <span className="text-slate-700 font-semibold">{lang === 'hi' ? 'Government of India' : 'भारत सरकार'}</span>
+                <span className="text-slate-600 font-medium">{lang === 'hi' ? 'Government of India' : 'भारत सरकार'}</span>
               </div>
-              <div className="text-[11px] sm:text-xs font-bold text-slate-700 tracking-wide leading-tight flex items-center gap-2 mt-0.5">
-                <span>{lang === 'hi' ? 'गृह मंत्रालय' : 'MINISTRY OF HOME AFFAIRS'}</span>
+              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 tracking-wide leading-tight flex items-center gap-2 mt-0.5">
+                <span className="font-bold">{lang === 'hi' ? 'गृह मंत्रालय' : 'MINISTRY OF HOME AFFAIRS'}</span>
                 <span className="text-slate-400 font-normal">|</span>
-                <span className="text-slate-600 font-semibold">{lang === 'hi' ? 'Ministry of Home Affairs' : 'गृह मंत्रालय'}</span>
+                <span className="text-slate-600 font-medium">{lang === 'hi' ? 'Ministry of Home Affairs' : 'गृह मंत्रालय'}</span>
               </div>
-              <div className="text-sm sm:text-base font-black text-[#D30B0D] tracking-tight uppercase mt-0.5">
+              <div className="text-sm sm:text-base font-bold text-[#003366] font-gov-serif tracking-normal mt-0.5">
                 {lang === 'hi' ? 'आव्रजन ब्यूरो · BUREAU OF IMMIGRATION' : 'BUREAU OF IMMIGRATION · आव्रजन ब्यूरो'}
               </div>
-              <div className="text-xs sm:text-sm font-extrabold text-[#003366] tracking-tight flex items-center gap-1.5 mt-0.5">
-                <span>ForgeProof</span>
+              <div className="text-xs sm:text-sm font-bold text-[#003366] tracking-tight flex items-center gap-1.5 mt-0.5">
+                <span className="font-black text-[#003366]">ForgeProof</span>
                 <span className="text-slate-400">·</span>
-                <span className="font-semibold text-slate-700 text-xs hidden sm:inline">
+                <span className="font-normal text-slate-600 text-xs hidden sm:inline">
                   {t('system_desc')}
                 </span>
               </div>
@@ -238,19 +238,19 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
           </div>
 
           {/* Right: Authenticated Officer Identity Card */}
-          <div className="flex items-center gap-3 bg-slate-50 border border-slate-300 rounded-lg p-2.5 shadow-2xs">
-            <div className="size-10 rounded-md bg-[#003366] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-300 rounded p-2.5 shadow-2xs">
+            <div className="size-10 rounded bg-[#003366] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs font-gov-sans">
               {officerName.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('') || 'OI'}
             </div>
             <div className="min-w-0 pr-1">
               <div className="flex items-center gap-2">
-                <p className="font-black text-xs text-[#003366] truncate">{officerName.toUpperCase()}</p>
+                <p className="font-bold text-xs text-[#003366] truncate">{officerName.toUpperCase()}</p>
                 <span className="size-2 rounded-full bg-emerald-600 shrink-0" title="Active Duty" />
               </div>
-              <p className="text-[10px] font-mono text-slate-600 font-bold truncate">
+              <p className="text-[10px] font-gov-mono text-slate-600 font-semibold truncate">
                 BADGE: <strong className="text-slate-900">{badgeNo}</strong> · {clearanceLevel.replace('LEVEL_', 'LVL ').replace('_', ' ')}
               </p>
-              <p className="text-[10px] text-slate-500 font-semibold truncate flex items-center gap-1">
+              <p className="text-[10px] text-slate-500 font-medium truncate flex items-center gap-1">
                 <MapPin size={10} className="text-slate-400 shrink-0" /> {dutyStation}
               </p>
             </div>
