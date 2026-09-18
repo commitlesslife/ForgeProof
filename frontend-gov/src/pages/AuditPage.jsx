@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle2, FileClock, Lock, RefreshCw, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, FileKey2, ShieldCheck, Activity, RefreshCw, Hash, Lock } from 'lucide-react'
 import { API_BASE } from '../config'
-import { PageIntro } from '../components/PortalShell'
-import { useLanguage } from '../utils/LanguageContext'
 
 export default function AuditPage() {
-  const { lang } = useLanguage()
   const [ledgerData, setLedgerData] = useState(null)
+  const [filter, setFilter] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchLedger = () => {
     setIsLoading(true)
     fetch(`${API_BASE}/api/v1/audit`)
       .then(res => res.json())
-      .then(data => setLedgerData(data))
+      .then(data => {
+        setLedgerData(data)
+      })
       .catch(err => console.error('Failed to fetch audit ledger:', err))
       .finally(() => setIsLoading(false))
   }
@@ -25,128 +25,156 @@ export default function AuditPage() {
   }, [])
 
   const entries = ledgerData?.ledger || []
-  const isIntact = ledgerData?.integrity ?? true
-  const totalEntries = ledgerData?.total_entries || entries.length || 1
+  const filteredEntries = filter
+    ? entries.filter(e => 
+        e.case_id?.toLowerCase().includes(filter.toLowerCase()) ||
+        e.officer_id?.toLowerCase().includes(filter.toLowerCase()) ||
+        e.action?.toLowerCase().includes(filter.toLowerCase()) ||
+        e.verdict?.toLowerCase().includes(filter.toLowerCase())
+      )
+    : entries
 
   return (
-    <div className="animate-fade-in-up">
-      <PageIntro
-        eyebrow={lang === 'hi' ? 'अपरिवर्तनीय SHA-256 ब्लॉकचेन लेजर' : 'Immutable SHA-256 ledger'}
-        title={lang === 'hi' ? 'कस्टडी ऑडिट और ब्लॉकचेन रिकॉर्ड' : 'Chain of custody audit'}
-        description={lang === 'hi' ? 'प्रत्येक दस्तावेज़ स्क्रीनिंग और अधिकारी के निर्णय को रिकॉर्ड करने वाला क्रिप्टोग्राफ़िक रूप से सील ऑडिट ट्रेल।' : 'Cryptographically sealed audit trail recording every document screening and officer decision.'}
-      />
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#0B477A] flex items-center gap-1.5">
+            <Lock size={13} className="text-[#0B477A]" /> Immutable SHA-256 Ledger
+          </p>
+          <h1 className="mt-0.5 sm:mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B477A]">
+            Chain of Custody Audit
+          </h1>
+          <p className="mt-0.5 text-xs sm:text-sm text-[#615D73]">
+            Cryptographically sealed audit trail recording every document screening and officer decision.
+          </p>
+        </div>
 
-      <div className="flex justify-end mb-5">
-        <button
-          onClick={fetchLedger}
-          disabled={isLoading}
-          className="border border-[#b9c8d3] bg-white px-4 py-2 text-xs font-bold text-[#155985] hover:bg-[#e9f1f5] transition cursor-pointer flex items-center gap-2"
-        >
-          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-          <span>{lang === 'hi' ? 'लेजर रीफ़्रेश करें' : 'Refresh ledger'}</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={fetchLedger}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white/80 border border-[#615D73]/20 px-3 sm:px-3.5 py-2 text-xs font-bold text-[#615D73] hover:text-[#0B477A] hover:border-[#0B477A]/40 transition shadow-xs cursor-pointer active:scale-95"
+          >
+            <RefreshCw size={14} className={isLoading ? 'animate-spin text-[#0B477A]' : 'text-[#0B477A]'} />
+            <span className="hidden sm:inline">Refresh Ledger</span>
+            <span className="sm:hidden">Refresh</span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        {/* Left Column: Verified Audit Blocks */}
-        <section className="panel p-6">
-          <h2 className="text-xl font-bold text-[#123f68]">
-            {lang === 'hi' ? 'सत्यापित ऑडिट ब्लॉक' : 'Verified audit blocks'} ({totalEntries})
-          </h2>
-
-          <div className="mt-5 space-y-4">
-            {entries.map((entry, idx) => {
-              const id = `#${String(entry.index ?? (idx + 1)).padStart(3, '0')}`
-              const ref = entry.case_id || 'GENESIS_BLOCK'
-              const type = entry.action || 'INITIALIZE_LEDGER'
-              const detail = entry.details?.notes || entry.details?.reason || entry.verdict || 'Cryptographically sealed checkpoint transaction.'
-              const status = entry.verdict || (entry.action === 'OFFICER_VERDICT' ? 'ADJUDICATED' : 'SEALED')
-              const hash = entry.current_hash || entry.block_hash || '07026b9443d9b6475a042d330e96c5a0c0eb375ed4053cc49cc434eef5cfd2bf'
-              const prevHash = entry.previous_hash || '0000000000000000000000000000000000000000000000000000000000000000'
-
-              return (
-                <article key={entry.current_hash || idx} className="border border-[#d3dce4] p-5 hover:bg-[#fafbfc] transition">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <span className="mr-3 bg-[#e5eff5] px-2 py-1 font-mono text-xs font-bold text-[#155985]">
-                        {id}
-                      </span>
-                      <b className="text-sm text-[#123f68] font-mono">{ref}</b>
-                      <span className="ml-2 text-xs text-slate-500 font-semibold">{type}</span>
-                    </div>
-                    <span className="bg-[#d9f5e8] px-2.5 py-1 text-[10px] font-bold text-[#087443] uppercase tracking-wide">
-                      {status}
-                    </span>
-                  </div>
-
-                  <p className="mt-3 text-sm text-slate-600">
-                    {detail}
-                  </p>
-
-                  <div className="mt-3 space-y-1">
-                    <div className="bg-[#20283c] p-2.5 font-mono text-[10px] text-slate-300 break-all rounded-xs">
-                      <span className="text-amber-400 font-bold">BLOCK HASH:</span> {hash}
-                    </div>
-                    {prevHash !== '0000000000000000000000000000000000000000000000000000000000000000' && (
-                      <div className="text-[10px] font-mono text-slate-400 pl-1 truncate">
-                        PREV: {prevHash}
-                      </div>
-                    )}
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Right Column: Specifications & Integrity */}
-        <aside className="space-y-5">
-          <div className="panel p-6">
+      <div className="grid gap-5 sm:gap-6 lg:grid-cols-[1.3fr_.7fr]">
+        {/* Ledger Integrity Sidebar (order-1 on mobile so status is visible immediately) */}
+        <aside className="space-y-4 sm:space-y-5 order-1 lg:order-2">
+          <div className="glass-effect rounded-[22px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 border border-white/70">
             <div className="flex items-center gap-3">
-              <span className={`grid size-10 place-items-center rounded ${isIntact ? 'bg-[#d9f5e8] text-[#087443]' : 'bg-[#fff5f5] text-[#b42318]'}`}>
-                {isIntact ? <CheckCircle2 size={24} /> : <ShieldAlert size={24} />}
-              </span>
-              <div>
-                <h2 className="font-bold text-[#123f68] text-base">
-                  {isIntact 
-                    ? (lang === 'hi' ? 'लेजर क्रिप्टोग्राफ़िक रूप से अक्षुण्ण है' : 'Ledger cryptographically intact') 
-                    : 'Integrity compromised'}
-                </h2>
-                <p className="mt-1 text-xs text-slate-600">
-                  {isIntact
-                    ? (lang === 'hi' ? 'सभी SHA-256 ब्लॉक जेनेसिस तक सत्यापित हैं।' : 'All SHA-256 blocks verified backwards to genesis.')
-                    : 'Block hash mismatch detected.'}
+              <div className={`rounded-2xl p-2.5 shrink-0 ${ledgerData?.integrity ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'bg-[#D30B0D] text-white shadow-md shadow-[#D30B0D]/30'}`}>
+                <ShieldCheck size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm sm:text-base text-[#0B477A] truncate">
+                  {ledgerData?.integrity ? 'Ledger Cryptographically Intact' : 'Integrity Compromised'}
+                </h3>
+                <p className="text-[11px] sm:text-xs text-[#615D73] font-medium">
+                  {ledgerData?.integrity ? 'All SHA-256 block hashes verified backwards to genesis.' : 'Hash chain inconsistency detected.'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="panel p-6">
-            <h2 className="font-bold text-[#123f68] flex items-center gap-2 text-base">
-              <Lock size={17} className="text-[#155985]" />
-              <span>{lang === 'hi' ? 'क्रिप्टोग्राफ़िक विनिर्देश' : 'Cryptographic specifications'}</span>
-            </h2>
+          <div className="glass-effect rounded-[22px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4 border border-white/70">
+            <div className="flex items-center gap-2.5 text-[#0B477A] font-extrabold text-sm">
+              <Hash size={17} className="text-[#0B477A]" />
+              <span>Cryptographic Specs</span>
+            </div>
 
-            <dl className="mt-5 space-y-4 text-sm">
-              <div className="flex justify-between border-b border-[#e1e7ec] pb-3">
-                <dt className="text-slate-500">Hash algorithm</dt>
-                <dd className="font-mono font-bold text-[#155985]">SHA-256 chained</dd>
+            <dl className="space-y-2.5 sm:space-y-3 text-xs">
+              <div className="flex justify-between py-1 border-b border-[#615D73]/15">
+                <dt className="text-[#615D73]">Hash Algorithm</dt>
+                <dd className="font-mono font-bold text-[#0B477A]">SHA-256 Chained</dd>
               </div>
-              <div className="flex justify-between border-b border-[#e1e7ec] pb-3">
-                <dt className="text-slate-500">Total sealed blocks</dt>
-                <dd className="font-bold text-[#123f68] font-mono">{totalEntries}</dd>
+              <div className="flex justify-between py-1 border-b border-[#615D73]/15">
+                <dt className="text-[#615D73]">Total Sealed Blocks</dt>
+                <dd className="font-mono font-bold text-[#0B477A]">{ledgerData?.total_entries || 0}</dd>
               </div>
-              <div className="flex justify-between border-b border-[#e1e7ec] pb-3">
-                <dt className="text-slate-500">Legal admissibility</dt>
-                <dd className="font-bold text-[#087443]">Section 65B (IEA)</dd>
+              <div className="flex justify-between py-1 border-b border-[#615D73]/15">
+                <dt className="text-[#615D73]">Immutability Standard</dt>
+                <dd className="font-semibold text-[#0B477A]">Tamper-Evident Merkle Chain</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Encryption standard</dt>
-                <dd className="font-mono font-bold text-[#155985]">FIPS 140-3 Level 1</dd>
+              <div className="flex justify-between py-1">
+                <dt className="text-[#615D73]">Compliance</dt>
+                <dd className="font-semibold text-emerald-700">Digital Evidence Act · Section 65B</dd>
               </div>
             </dl>
           </div>
         </aside>
+
+        {/* Ledger Entries List (order-2 on mobile) */}
+        <section className="glass-effect rounded-[22px] sm:rounded-[28px] p-4 sm:p-6 space-y-4 order-2 lg:order-1 border border-white/70">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+            <h2 className="text-sm sm:text-base font-extrabold text-[#0B477A]">
+              Verified Audit Blocks ({filteredEntries.length})
+            </h2>
+            <input
+              type="text"
+              placeholder="Filter by Case, Officer, Action..."
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+              className="px-3 py-2 sm:py-1.5 rounded-xl border border-white/80 bg-white/70 text-xs text-[#0B477A] placeholder:text-[#615D73]/60 focus:outline-none focus:ring-2 focus:ring-[#0B477A]/20 focus:border-[#0B477A] w-full sm:w-56"
+            />
+          </div>
+
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+            {filteredEntries.length === 0 ? (
+              <div className="p-8 text-center text-[#615D73]/70 text-xs">
+                No audit entries match the current filter.
+              </div>
+            ) : (
+              [...filteredEntries].reverse().map((entry, index) => (
+                <div key={entry.entry_id} className="rounded-2xl border border-white/80 glass-card p-4 space-y-2 hover:bg-white/95 transition shadow-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold glass-navy-subtle text-[#0B477A] px-2 py-0.5 rounded-md">
+                        #{entry.entry_id}
+                      </span>
+                      <span className="font-mono text-xs font-bold text-slate-800">
+                        {entry.case_id}
+                      </span>
+                      <span className="text-[11px] font-semibold text-[#615D73]">
+                        {entry.action}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                      entry.verdict === 'LOW' || entry.verdict === 'APPROVED' || entry.verdict === 'AUTHORIZED' ? 'bg-emerald-100 text-emerald-800' :
+                      entry.verdict === 'MEDIUM' || entry.verdict === 'SECONDARY_REVIEW' ? 'bg-amber-100 text-amber-800' :
+                      'bg-[#D30B0D]/10 text-[#D30B0D] border border-[#D30B0D]/30'
+                    }`}>
+                      {entry.verdict}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#615D73] font-medium">
+                    {entry.notes || 'Automated screening record'}
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-between text-[10px] text-[#615D73]/80 pt-1 border-t border-[#615D73]/10 gap-2">
+                    <span>Officer: <strong className="text-[#0B477A]">{entry.officer_id}</strong> · {new Date(entry.timestamp).toLocaleString()}</span>
+                  </div>
+
+                  <div className="bg-slate-900 text-slate-300 rounded-xl p-2.5 font-mono text-[10px] space-y-1">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-slate-500 shrink-0">PREV:</span>
+                      <span className="truncate">{entry.prev_hash}</span>
+                    </div>
+                    <div className="flex items-center gap-2 truncate text-slate-200">
+                      <span className="text-slate-500 shrink-0">HASH:</span>
+                      <span className="truncate">{entry.entry_hash}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
       </div>
     </div>
   )

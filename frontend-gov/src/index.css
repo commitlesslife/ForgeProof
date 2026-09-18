@@ -10,19 +10,14 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    background-color: #eef3f7;
   }
   body {
-    font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #eef3f7;
-    color: #1f3347;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #EDF2F7;
+    color: #1E293B;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-  }
-  ::selection {
-    background: #c9dfed;
-    color: #073b66;
   }
 }
 
@@ -41,23 +36,109 @@
     scrollbar-width: none;
   }
 
-  /* Professional Redesign Palette */
-  .bg-panel {
-    background-color: #ffffff;
-    border: 1px solid #d3dce4;
-    box-shadow: 0 8px 24px rgba(27, 54, 75, 0.06);
-  }
+  /* National Government Color Palette */
+  .bg-gov-navy { background-color: #003366; }
+  .text-gov-navy { color: #003366; }
+  .border-gov-navy { border-color: #003366; }
 
-  .panel {
-    border: 1px solid #d3dce4;
-    background-color: #ffffff;
-    box-shadow: 0 8px 24px rgba(27, 54, 75, 0.06);
-  }
+  .bg-gov-gold { background-color: #D4AF37; }
+  .text-gov-gold { color: #D4AF37; }
+  .border-gov-gold { border-color: #D4AF37; }
 
+  .bg-navy { background-color: #003366; }
+  .text-navy { color: #003366; }
+  .border-navy { border-color: #003366; }
+
+  /* National Tricolor Header Strip */
   .tricolor-stripe {
     background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.3%, #FFFFFF 33.3%, #FFFFFF 66.6%, #138808 66.6%, #138808 100%);
     height: 4px;
     width: 100%;
+  }
+
+  /* Solid Government Institutional Card Styles (Replaces floaty glassmorphism) */
+  .glass-effect {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .glass-card {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  /* Official Deep Navy Headers & Buttons */
+  .glass-navy {
+    background-color: #003366;
+    border: 1px solid #002244;
+    color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0, 51, 102, 0.2);
+  }
+
+  .glass-navy-subtle {
+    background-color: #EBF3FA;
+    border: 1px solid #B8D5ED;
+    color: #003366;
+  }
+
+  .glass-navy-interactive {
+    background-color: #003366;
+    border: 1px solid #002244;
+    color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0, 51, 102, 0.2);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .glass-navy-interactive:hover {
+    background-color: #002244;
+    border-color: #001830;
+  }
+
+  /* Stable, Non-Floaty Action Buttons */
+  .hover-lift {
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .hover-lift:hover {
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-hover-clear:hover {
+    background-color: #DCFCE7;
+    border-color: #16A34A;
+  }
+
+  .btn-hover-secondary:hover {
+    background-color: #FEF3C7;
+    border-color: #D97706;
+  }
+
+  .btn-hover-detain:hover {
+    background-color: #FEE2E2;
+    border-color: #DC2626;
+  }
+
+  .focus-glow:focus {
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.25);
+    outline: none;
+  }
+
+  /* Scanner Reticle Beam */
+  .scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #003366;
+    box-shadow: 0 0 8px rgba(0, 51, 102, 0.4);
+    animation: scanLine 2.8s ease-in-out infinite;
+  }
+
+  @keyframes scanLine {
+    0% { top: 0%; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
   }
 
   @keyframes fadeInUp {
@@ -68,52 +149,65 @@
     animation: fadeInUp 0.25s ease-out forwards;
   }
 
-  @keyframes scanLine {
-    0% { top: 0%; opacity: 0; }
-    15% { opacity: 1; }
-    85% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
   }
-  .scan-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #155985;
-    box-shadow: 0 0 8px rgba(21, 89, 133, 0.5);
-    animation: scanLine 2.5s ease-in-out infinite;
+  .animate-slide-in-right {
+    animation: slideInRight 0.2s ease-out forwards;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  @keyframes progress-fill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+  .animate-progress-fill {
+    animation: progress-fill 1.5s ease-out forwards;
   }
 }
 
-/* Dark Booth Inspection Mode */
+/* Dark Booth Inspection Mode (For Low-Light Airport Inspection Booths) */
 body.dark-booth {
-  background-color: #0f1722;
-  color: #e2e8f0;
+  background-color: #0F172A;
+  color: #E2E8F0;
 }
 
-body.dark-booth .bg-panel,
-body.dark-booth .panel {
-  background-color: #172332;
-  border-color: #273a50;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  color: #e2e8f0;
+body.dark-booth .glass-effect {
+  background-color: #1E293B;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: #E2E8F0;
+}
+
+body.dark-booth .glass-card {
+  background-color: #0F172A;
+  border-color: #334155;
+  color: #E2E8F0;
 }
 
 body.dark-booth h1, 
 body.dark-booth h2, 
 body.dark-booth h3 {
-  color: #90c2e7 !important;
+  color: #93C5FD !important;
 }
 
 body.dark-booth p,
 body.dark-booth span {
-  color: #cbd5e1 !important;
+  color: #CBD5E1 !important;
 }
 
 body.dark-booth input,
 body.dark-booth select,
 body.dark-booth textarea {
-  background-color: #0f1722 !important;
-  border-color: #334e68 !important;
-  color: #f8fafc !important;
+  background-color: #0F172A !important;
+  border-color: #475569 !important;
+  color: #F8FAFC !important;
 }

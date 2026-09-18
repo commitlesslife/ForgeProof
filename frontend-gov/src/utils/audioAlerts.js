@@ -122,7 +122,7 @@ export function playKlaxonAlarm() {
  * Automatically triggers the corresponding acoustic alert based on risk tier and Interpol hit status.
  */
 export function playVerdictAudio(riskLevel, isWatchlistHit = false) {
-  if (isWatchlistHit || (riskLevel && (riskLevel.toUpperCase() === 'HIGH' || riskLevel.toUpperCase() === 'CRITICAL'))) {
+  if (isWatchlistHit || (riskLevel && riskLevel.toUpperCase() === 'HIGH')) {
     playKlaxonAlarm();
   } else if (riskLevel && riskLevel.toUpperCase() === 'MEDIUM') {
     playWarningTone();
@@ -130,14 +130,3 @@ export function playVerdictAudio(riskLevel, isWatchlistHit = false) {
     playApprovalChime();
   }
 }
-
-export function playAlertSound(type) {
-  if (type === 'critical' || type === 'high') {
-    playKlaxonAlarm();
-  } else if (type === 'warning' || type === 'medium') {
-    playWarningTone();
-  } else {
-    playApprovalChime();
-  }
-}
-
