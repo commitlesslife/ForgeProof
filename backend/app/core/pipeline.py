@@ -287,7 +287,7 @@ def run_preset_scenario_pipeline(
     if live_path and os.path.exists(live_path):
         face_res = verify_faces(doc_path, live_path, str(FACES_DIR), case_id)
 
-    if preset_id == "scenario1_genuine_passport":
+    if preset_id in ("scenario1_genuine_passport", "deck_authentic"):
         valid_mrz = ["P<INDSHARMA<<ROHIT<<<<<<<<<<<<<<<<<<<<<<<<<", "Z4829103<6IND9408159M3101090<<<<<<<<<<<<<<<4"]
         mrz_data = parse_mrz_td3(valid_mrz)
         validate_icao_mrz(mrz_data)
@@ -296,18 +296,144 @@ def run_preset_scenario_pipeline(
         tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
         face_res = face_res or {"success": True, "match_score": 94.2, "is_match": True, "face_risk": 5.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
-    elif preset_id == "scenario2_photo_splice":
+    elif preset_id in ("scenario2_photo_splice", "deck_photo_splice"):
         valid_mrz = ["P<INDSHARMA<<ROHIT<<<<<<<<<<<<<<<<<<<<<<<<<", "Z4829103<6IND9408159M3101090<<<<<<<<<<<<<<<4"]
         mrz_data = parse_mrz_td3(valid_mrz)
         validate_icao_mrz(mrz_data)
         viz_data = {"doc_number": "Z4829103", "full_name": "ROHIT SHARMA", "nationality": "INDIAN", "expiry_date": "09/01/2031"}
         validation_res = {"mrz": mrz_data, "viz_fields": viz_data, "cross_validation": cross_validate_mrz_and_viz(viz_data, mrz_data)}
-        tampering_res.update({"tampering_score": 88.0, "is_tampered": True})
+        tampering_res.update({
+            "tampering_score": 88.0, 
+            "is_tampered": True,
+            "evidence_list": [
+                {"type": "PHOTO_SPLICE", "severity": "CRITICAL", "title": "Boundary Edge Splice Detected", "description": "High-frequency edge variance around passport portrait border indicating physical photograph replacement."}
+            ]
+        })
         face_res = face_res or {"success": True, "match_score": 21.5, "is_match": False, "face_risk": 88.0}
+        risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+    elif preset_id in ("scenario3_date_fraud", "scenario3_tampered_date_mrz_mismatch"):
+        mrz_lines = ["P<INDSHARMA<<ROHIT<<<<<<<<<<<<<<<<<<<<<<<<<", "Z4829103<6IND9408159M3101090<<<<<<<<<<<<<<<4"]
+        mrz_data = parse_mrz_td3(mrz_lines)
+        validate_icao_mrz(mrz_data)
+        viz_data = {"doc_number": "Z4829103", "full_name": "ROHIT SHARMA", "nationality": "INDIAN", "expiry_date": "09/01/2036"}
+        validation_res = {
+            "mrz": mrz_data,
+            "viz_fields": viz_data,
+            "cross_validation": {
+                "is_consistent": False,
+                "discrepancies": ["Document expiry date mismatch: VIZ shows 2036 while MRZ encodes 2031"]
+            }
+        }
+        tampering_res.update({
+            "tampering_score": 80.0,
+            "is_tampered": True,
+            "evidence_list": [
+                {"type": "DATE_TAMPERING", "severity": "HIGH", "title": "Optical Character Alteration", "description": "Printed date of expiry altered from 2031 to 2036."}
+            ]
+        })
+        face_res = face_res or {"success": True, "match_score": 91.0, "is_match": True, "face_risk": 9.0}
+        risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+    elif preset_id in ("scenario4_genuine_aadhaar", "scenario4_genuine_indian_aadhaar"):
+        validation_res = {
+            "indian_id": {
+                "valid": True,
+                "doc_type": "AADHAAR",
+                "doc_number_masked": "XXXX-XXXX-1841",
+                "checksum_algorithm": "UIDAI Verhoeff D5 Checksum",
+                "reason": "Verhoeff check digit valid"
+            },
+            "viz_fields": {
+                "doc_number": "XXXX-XXXX-1841",
+                "full_name": "Rohit Sharma",
+                "dob": "15/08/1994",
+                "issuing_authority": "UIDAI (Unique Identification Authority of India)"
+            }
+        }
+        tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
+        face_res = face_res or {"success": True, "match_score": 94.0, "is_match": True, "face_risk": 6.0}
+        risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+    elif preset_id in ("scenario5_tampered_aadhaar", "scenario5_tampered_aadhaar_invalid_verhoeff", "deck_verhoeff_fail"):
+        validation_res = {
+            "indian_id": {
+                "valid": False,
+                "doc_type": "AADHAAR",
+                "doc_number_masked": "XXXX-XXXX-1842",
+                "checksum_algorithm": "UIDAI Verhoeff D5 Checksum",
+                "reason": "Verhoeff check digit invalid (mathematical permutation error in UID)"
+            },
+            "viz_fields": {
+                "doc_number": "XXXX-XXXX-1842",
+                "full_name": "Rohit Sharma",
+                "dob": "15/08/1994",
+                "issuing_authority": "UIDAI (Unique Identification Authority of India)"
+            }
+        }
+        tampering_res.update({
+            "tampering_score": 92.0,
+            "is_tampered": True,
+            "evidence_list": [
+                {"type": "CHECKSUM_VIOLATION", "severity": "CRITICAL", "title": "UIDAI Verhoeff Checksum Failure", "description": "12-digit Aadhaar UID number violates mathematical dihedral group D5 check digit."}
+            ]
+        })
+        face_res = face_res or {"success": True, "match_score": 88.5, "is_match": True, "face_risk": 11.5}
+        risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+    elif preset_id in ("scenario1_interpol_hit", "deck_interpol_hit"):
+        valid_mrz = ["P<INDSHARMA<<ROHIT<<<<<<<<<<<<<<<<<<<<<<<<<", "Z4829103<6IND9408159M3101090<<<<<<<<<<<<<<<4"]
+        mrz_data = parse_mrz_td3(valid_mrz)
+        validate_icao_mrz(mrz_data)
+        viz_data = {"doc_number": "Z4829103", "full_name": "ROHIT SHARMA", "nationality": "INDIAN", "expiry_date": "09/01/2031"}
+        validation_res = {
+            "mrz": mrz_data, 
+            "viz_fields": viz_data, 
+            "cross_validation": cross_validate_mrz_and_viz(viz_data, mrz_data),
+            "watchlist": {
+                "is_hit": True,
+                "severity": "CRITICAL",
+                "notice_id": "INTERPOL-RED-2026-9041",
+                "notice_type": "INTERPOL RED NOTICE",
+                "category": "FUGITIVE WANTED FOR PROSECUTION",
+                "target_name": "Rohit Sharma",
+                "issuing_state": "India (CBI / Interpol NCB New Delhi)",
+                "offense": "High-Value Cross-Border Financial Fraud & Extradition Warrant",
+                "action_required": "DETAIN SUBJECT IMMEDIATELY & CONTACT CBI NCB",
+                "matched_on": ["PASSPORT_NO: Z4829103", "DOB: 15/08/1994", "NAME: ROHIT SHARMA"],
+                "status_banner": "🚨 CRITICAL INTERPOL RED NOTICE HIT: ACTIVE INTERNATIONAL ARREST WARRANT"
+            }
+        }
+        tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
+        face_res = face_res or {"success": True, "match_score": 94.2, "is_match": True, "face_risk": 5.0}
+        risk_res = {
+            "composite_score": 100.0,
+            "risk_level": "CRITICAL",
+            "risk_color": "red",
+            "recommendation": "CRITICAL THREAT: Active Interpol Red Notice Hit (#2026-9041). Detain subject immediately and notify CBI NCB.",
+            "sub_scores": {"validation_risk": 0.0, "tampering_risk": 5.0, "face_risk": 5.0, "metadata_risk": 0.0, "watchlist_risk": 100.0},
+            "evidence_items": [
+                {"severity": "CRITICAL", "title": "Interpol Red Notice Warrant", "detail": "Subject Rohit Sharma matches active Red Notice warrant #2026-9041 for international financial fraud."}
+            ]
+        }
+    elif preset_id in ("scenario6_forged_visa", "scenario6_forged_visa_stamp"):
+        viz_data = {"doc_number": "V9842104", "full_name": "ROHIT SHARMA", "nationality": "INDIAN", "expiry_date": "15/12/2027"}
+        validation_res = {"viz_fields": viz_data}
+        tampering_res.update({
+            "tampering_score": 70.0,
+            "is_tampered": True,
+            "stamp": {
+                "has_stamp": True,
+                "stamp_circularity": 0.02,
+                "stamp_integrity_valid": False,
+                "stamp_score": 70.0,
+                "detail": "Irregular stamp contour detected (possible digital stamp forgery)."
+            },
+            "evidence_list": [
+                {"type": "STAMP_FORGERY", "severity": "HIGH", "title": "Irregular Entry Stamp Geometry", "description": "Stamp contour circularity violates official border entry seal templates."}
+            ]
+        })
+        face_res = face_res or {"success": True, "match_score": 93.0, "is_match": True, "face_risk": 7.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
     else:
         # Fallback to standard screening pipeline
-        return process_screening_pipeline(doc_path, live_path, doc_type, case_id)
+        return process_screening_pipeline(doc_path=doc_path, live_path=live_path, doc_type=doc_type, case_id=case_id)
 
     doc_image_url = f"/static/samples/{os.path.basename(doc_path)}"
     live_image_url = f"/static/samples/{os.path.basename(live_path)}" if live_path else None

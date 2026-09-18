@@ -578,6 +578,8 @@ def run_preset_scenario(preset_id: str, live_mode: str = "default"):
 
     if live_mode == "impersonator":
         live_path = os.path.join(str(SAMPLES_DIR), "presenter_impersonator_mismatch.jpg")
+    else:
+        live_path = os.path.join(str(SAMPLES_DIR), p["live_filename"])
     from app.core.pipeline import run_preset_scenario_pipeline
     result = run_preset_scenario_pipeline(
         preset_id=preset_id,

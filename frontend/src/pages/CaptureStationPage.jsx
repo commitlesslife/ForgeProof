@@ -13,6 +13,7 @@ const docTypes = [
 const CALIBRATION_PRESETS = [
   {
     id: 'deck_authentic',
+    backendPresetId: 'scenario1_genuine_passport',
     tag: 'AUTHENTIC CLEARANCE',
     tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     title: 'Genuine Indian Passport (ICAO Doc 9303)',
@@ -25,6 +26,7 @@ const CALIBRATION_PRESETS = [
   },
   {
     id: 'deck_photo_splice',
+    backendPresetId: 'scenario2_photo_splice',
     tag: 'PHOTO SPLICE FORGERY',
     tagColor: 'bg-rose-50 text-rose-700 border-rose-200',
     title: 'Tampered Passport · Photo Splice Overlay',
@@ -36,9 +38,36 @@ const CALIBRATION_PRESETS = [
     expected: 'HIGH RISK · ANOMALY FLOOR TRIGGERED'
   },
   {
-    id: 'deck_verhoeff_fail',
-    tag: 'VERHOEFF CHECKSUM FAIL',
+    id: 'deck_date_fraud',
+    backendPresetId: 'scenario3_date_fraud',
+    tag: 'MRZ CHECKSUM MISMATCH',
     tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    title: 'Tampered Passport · Date Fraud & MRZ Desync',
+    subtitle: 'Printed expiry modified to 2036 vs encoded 2031 in MRZ',
+    docType: 'PASSPORT',
+    docFile: 'scenario3_tampered_date_mrz_mismatch.jpg',
+    faceFile: 'presenter_rohit_matching.jpg',
+    summary: 'Printed expiry modified; MRZ check digit fails mathematical 7-3-1 verification.',
+    expected: 'HIGH RISK · CHECKSUM DISCREPANCY'
+  },
+  {
+    id: 'deck_genuine_aadhaar',
+    backendPresetId: 'scenario4_genuine_aadhaar',
+    tag: 'UIDAI VERHOEFF PASS',
+    tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    title: 'Genuine Indian Aadhaar Card (UIDAI)',
+    subtitle: 'UIDAI official Verhoeff D5 checksum verified standard',
+    docType: 'AADHAAR',
+    docFile: 'scenario4_genuine_indian_aadhaar.jpg',
+    faceFile: 'presenter_rohit_matching.jpg',
+    summary: 'Valid 12-digit UIDAI standard, Verhoeff dihedral group D5 check digit verified, biometric match.',
+    expected: 'LOW RISK · ADMISSIBLE'
+  },
+  {
+    id: 'deck_verhoeff_fail',
+    backendPresetId: 'scenario5_tampered_aadhaar',
+    tag: 'VERHOEFF CHECKSUM FAIL',
+    tagColor: 'bg-rose-50 text-rose-700 border-rose-200',
     title: 'Forged Aadhaar · Number Modification',
     subtitle: 'Data integrity layer tampering on printed demographic zone',
     docType: 'AADHAAR',
@@ -49,6 +78,7 @@ const CALIBRATION_PRESETS = [
   },
   {
     id: 'deck_interpol_hit',
+    backendPresetId: 'deck_interpol_hit',
     tag: 'INTERPOL RED NOTICE HIT',
     tagColor: 'bg-red-100 text-red-800 border-red-300',
     title: 'Interpol Watchlist Persona (Rohit Sharma)',
@@ -183,24 +213,70 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
     }
   }
 
+  const fetchSampleImage = async (filename) => {
+    const candidateUrls = [
+      `${API_BASE}/static/samples/${filename}`,
+      `/static/samples/${filename}`,
+      `http://127.0.0.1:8000/static/samples/${filename}`
+    ]
+    for (const url of candidateUrls) {
+      try {
+        const res = await fetch(url)
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || ''
+          if (contentType.includes('text/html')) continue
+          const blob = await res.blob()
+          if (blob.size > 200) {
+            return blob
+          }
+        }
+      } catch {
+        // continue to next candidate URL
+      }
+    }
+    throw new Error(`Unable to load dataset image (${filename}). Please ensure backend or static assets are accessible.`)
+  }
+
   const handleLoadPreset = async (preset, runImmediately = false) => {
     setLoadingPresetId(preset.id)
     try {
-      // 1. Fetch doc image
-      const docRes = await fetch(`${API_BASE}/static/samples/${preset.docFile}`)
-      if (!docRes.ok) throw new Error("Failed to load sample document image")
-      const docBlob = await docRes.blob()
+      // 1. If runImmediately is requested, try the fast preset API endpoint (< 1s execution)
+      if (runImmediately && preset.backendPresetId) {
+        setStep(4)
+        setIsProcessing(true)
+        setProcessingPhase('Executing defense benchmark arbitration...')
+        stopCamera()
+        setShowCalibrationModal(false)
+
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/cases/preset/${preset.backendPresetId}`, {
+            method: 'POST'
+          })
+          if (res.ok) {
+            const caseData = await res.json()
+            if (caseData?.case_id) {
+              setTimeout(() => {
+                onComplete(caseData.case_id)
+              }, 800)
+              return
+            }
+          }
+        } catch (fastErr) {
+          console.warn("Fast preset endpoint unavailable, falling back to full pipeline:", fastErr)
+        }
+      }
+
+      // 2. Fetch doc image with candidate fallbacks
+      const docBlob = await fetchSampleImage(preset.docFile)
       const docFileObj = new File([docBlob], preset.docFile, { type: docBlob.type || 'image/jpeg' })
       const docPreview = URL.createObjectURL(docBlob)
 
-      // 2. Fetch face image
-      const faceRes = await fetch(`${API_BASE}/static/samples/${preset.faceFile}`)
-      if (!faceRes.ok) throw new Error("Failed to load sample presenter image")
-      const faceBlob = await faceRes.blob()
+      // 3. Fetch face image with candidate fallbacks
+      const faceBlob = await fetchSampleImage(preset.faceFile)
       const faceFileObj = new File([faceBlob], preset.faceFile, { type: faceBlob.type || 'image/jpeg' })
       const facePreview = URL.createObjectURL(faceBlob)
 
-      // 3. Set state
+      // 4. Update inspection station state
       setDocType(preset.docType)
       setDocImage({ file: docFileObj, previewUrl: docPreview })
       setDocBackImage(null)
@@ -209,20 +285,23 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
       setShowCalibrationModal(false)
 
       if (runImmediately) {
-        submitCase(faceFileObj, docFileObj)
+        submitCase(faceFileObj, docFileObj, preset.docType)
       } else {
         setStep(2)
       }
     } catch (err) {
       console.error("Preset loading error:", err)
-      alert("Failed to load calibration preset: " + err.message)
+      alert("Defense Benchmark Error: " + err.message)
+      setIsProcessing(false)
+      setStep(1)
     } finally {
       setLoadingPresetId(null)
     }
   }
 
-  const submitCase = async (finalFaceFile, currentDocFile = null) => {
+  const submitCase = async (finalFaceFile, currentDocFile = null, overrideDocType = null) => {
     const activeDocFile = currentDocFile || docImage?.file
+    const activeDocType = overrideDocType || docType
     if (!activeDocFile) {
       alert("Document file missing. Please scan or upload an ID document first.")
       setStep(2)
@@ -257,7 +336,7 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
 
     try {
       const formData = new FormData()
-      formData.append('doc_type', docType)
+      formData.append('doc_type', activeDocType)
       formData.append('doc_file', activeDocFile)
       if (docBackImage?.file) {
         formData.append('doc_back_file', docBackImage.file)
@@ -505,7 +584,7 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
                 {faceImage ? (
                   <button
                     type="button"
-                    onClick={() => submitCase(faceImage.file, docImage.file)}
+                    onClick={() => submitCase(faceImage.file, docImage.file, docType)}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#D30B0D] hover:bg-[#B3090B] px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#D30B0D]/25 transition hover:-translate-y-0.5 active:scale-98 cursor-pointer"
                   >
                     <Play size={16} className="fill-white" />
