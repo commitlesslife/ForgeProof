@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bell, ClipboardList, FileSearch, LayoutDashboard, LogOut, ShieldCheck, ScanLine, UserCheck, MapPin, Moon, Sun, Volume2, VolumeX, Activity, Radio, Clock, Globe2, ChevronDown, CheckCircle2, ShieldAlert, Languages } from 'lucide-react'
 import { isAudioMuted, setAudioMuted } from '../utils/audioAlerts'
 import { useLanguage } from '../utils/LanguageContext'
+import { ForgeProofLogo, ForgeProofEmblem } from './ForgeProofLogo'
 
 function AshokaEmblem({ className = "h-14 w-auto" }) {
   return (
@@ -223,10 +224,10 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
               <div className="text-sm sm:text-base font-bold text-[#003366] font-gov-serif tracking-normal mt-0.5">
                 {lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी)' : 'SASHASTRA SEEMA BAL (SSB)'}
               </div>
-              <div className="text-xs sm:text-sm font-bold text-[#003366] tracking-tight flex items-center gap-1.5 mt-0.5">
-                <span className="font-black text-[#003366]">ForgeProof</span>
-                <span className="text-slate-400">·</span>
-                <span className="font-normal text-slate-600 text-xs hidden sm:inline">
+              <div className="text-xs sm:text-sm font-bold text-[#003366] tracking-tight flex items-center gap-2 mt-1">
+                <ForgeProofLogo className="h-4 sm:h-4.5 w-auto" />
+                <span className="text-slate-300 font-light hidden sm:inline">|</span>
+                <span className="font-normal text-slate-600 text-[11px] sm:text-xs hidden sm:inline">
                   {t('system_desc')}
                 </span>
               </div>
@@ -324,8 +325,11 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
         <div className="mx-auto max-w-[1520px] px-4 py-8 grid grid-cols-1 md:grid-cols-4 gap-6 border-b border-slate-700 text-xs">
           
           <div className="space-y-2">
-            <p className="font-black text-white uppercase text-sm flex items-center gap-2">
-              <ShieldCheck size={16} className="text-emerald-400" /> {lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी)' : 'SASHASTRA SEEMA BAL (SSB)'}
+            <div className="mb-2">
+              <ForgeProofLogo variant="full" theme="light" className="h-6 w-auto" />
+            </div>
+            <p className="font-black text-white uppercase text-xs flex items-center gap-2">
+              <ShieldCheck size={14} className="text-emerald-400" /> {lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी)' : 'SASHASTRA SEEMA BAL (SSB)'}
             </p>
             <p className="text-slate-400 leading-relaxed text-[11px]">
               {t('footer_agency_desc')}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ShieldCheck, Lock, AlertCircle, UserCheck, KeyRound } from 'lucide-react'
 import { API_BASE } from '../config'
+import { ForgeProofLogo } from '../components/ForgeProofLogo'
 
 function AshokaEmblem({ className = "h-16 w-auto" }) {
   return (
@@ -73,8 +74,11 @@ export default function LoginPage({ onLogin }) {
           <div className="text-sm font-black uppercase tracking-tight text-[#003366] mt-0.5">
             SASHASTRA SEEMA BAL (SSB)
           </div>
-          <div className="text-xs font-semibold text-slate-600 mt-0.5">
-            ForgeProof Border Screening & Document Verification Workstation
+          <div className="flex justify-center items-center my-2.5">
+            <ForgeProofLogo className="h-6 sm:h-7 w-auto drop-shadow-xs" />
+          </div>
+          <div className="text-[11px] sm:text-xs font-semibold text-slate-600">
+            Border Screening & Document Verification Workstation
           </div>
         </div>
 
