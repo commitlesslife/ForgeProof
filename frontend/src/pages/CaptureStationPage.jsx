@@ -3,11 +3,11 @@ import { ArrowRight, ArrowLeft, Camera, Upload, CheckCircle2, FileText, ScanFace
 import { API_BASE } from '../config'
 
 const docTypes = [
-  { id: 'AADHAAR', label: 'Aadhaar Card' },
-  { id: 'PASSPORT', label: 'Passport' },
-  { id: 'PAN', label: 'PAN Card' },
-  { id: 'DRIVING_LICENSE', label: 'Driving License' },
-  { id: 'VOTER_ID', label: 'Voter ID' }
+  { id: 'PASSPORT', label: 'Passport (ICAO Doc 9303)', desc: 'International Machine Readable Travel Document (TD1/TD2/TD3)' },
+  { id: 'AADHAAR', label: 'Aadhaar Card (UIDAI)', desc: '12-Digit Demographic & Cryptographic Secure QR Card' },
+  { id: 'PAN', label: 'Permanent Account Number (PAN)', desc: 'Income Tax Department Taxpayer Identity Card' },
+  { id: 'DRIVING_LICENSE', label: 'Driving Licence (MoRTH)', desc: 'State Motor Vehicle Operator Permit' },
+  { id: 'VOTER_ID', label: 'Voter Identity Card (ECI)', desc: 'Election Commission of India Electoral Photo ID (EPIC)' }
 ]
 
 const CALIBRATION_PRESETS = [
@@ -231,7 +231,7 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
           }
         }
       } catch {
-        // continue to next candidate URL
+        // continue to next URL candidate
       }
     }
     throw new Error(`Unable to load dataset image (${filename}). Please ensure backend or static assets are accessible.`)
@@ -397,44 +397,50 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
         <button
           type="button"
           onClick={() => setShowCalibrationModal(true)}
-          className="inline-flex items-center gap-1.5 rounded-xl glass-card px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold text-[#0B477A] hover:bg-white hover:border-[#0B477A]/30 transition shadow-xs cursor-pointer border border-white/80 active:opacity-80"
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-mono font-black text-amber-900 border border-amber-500/30 transition shadow-xs cursor-pointer active:opacity-80"
         >
-          <Zap size={14} className="text-amber-600 fill-amber-600/20" />
-          <span>Calibration Test Deck</span>
+          <Zap size={14} className="text-amber-600 fill-amber-600/30" />
+          <span>⚡ DEFENSE BENCHMARKS (SIH TEST DECK)</span>
         </button>
       </div>
 
-      <div className="glass-effect rounded-[24px] sm:rounded-[28px] overflow-hidden border border-white/70">
+      <div className="glass-effect rounded-2xl overflow-hidden border border-slate-300/80 shadow-xs">
         {/* Progress Bar */}
-        <div className="flex border-b border-[#615D73]/15">
+        <div className="flex border-b border-slate-300/70 bg-slate-100/50">
           {[
-            { num: 1, label: 'Document Type' },
-            { num: 2, label: 'Scan Document' },
-            { num: 3, label: 'Capture Face' },
-            { num: 4, label: 'Verification' }
+            { num: 1, label: 'Classification' },
+            { num: 2, label: 'Optical VIZ Scan' },
+            { num: 3, label: '1:1 Biometrics' },
+            { num: 4, label: 'Forensic Arbitration' }
           ].map((s) => (
-            <div key={s.num} className={`flex-1 py-3 sm:py-4 px-1 sm:px-2 text-center text-xs sm:text-sm font-semibold transition-colors ${step >= s.num ? 'text-[#0B477A] bg-[#0B477A]/5 font-bold' : 'text-[#615D73]/70'}`}>
-              <span className={`inline-flex size-6 items-center justify-center rounded-full text-xs mr-1 sm:mr-2 transition-all ${step >= s.num ? 'glass-navy text-white font-bold' : 'bg-[#615D73]/15 text-[#615D73]'}`}>
+            <div key={s.num} className={`flex-1 py-3 sm:py-3.5 px-1 sm:px-2 text-center text-xs sm:text-sm font-semibold transition-colors ${step >= s.num ? 'text-[#0B477A] bg-[#0B477A]/5 font-bold' : 'text-[#615D73]/70'}`}>
+              <span className={`inline-flex size-5 sm:size-6 items-center justify-center rounded-md font-mono text-xs mr-1 sm:mr-2 transition-all ${step >= s.num ? 'glass-navy text-white font-bold' : 'bg-slate-200 text-[#615D73]'}`}>
                 {s.num}
               </span>
-              <span className="hidden sm:inline">{s.label}</span>
+              <span className="hidden sm:inline font-mono tracking-tight text-xs uppercase">{s.label}</span>
             </div>
           ))}
         </div>
 
-        <div className="p-4 sm:p-6 md:p-10">
+        <div className="p-4 sm:p-6 md:p-8">
           {step === 1 && (
             <div className="animate-slide-in-right">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#0B477A] text-center mb-6 sm:mb-8">Select Document Type</h2>
+              <div className="text-center mb-6">
+                <span className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-[#0B477A] bg-[#0B477A]/10 px-2 py-0.5 rounded border border-[#0B477A]/20">
+                  STEP 1 OF 4 · STATUTORY CLASSIFICATION
+                </span>
+                <h2 className="text-lg sm:text-xl font-black text-[#0B477A] mt-1.5">Select Credential Under Inspection</h2>
+                <p className="text-xs text-[#615D73] mt-0.5">Determine document schema and regulatory checksum protocol.</p>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {docTypes.map(type => (
                   <button
                     key={type.id}
                     onClick={() => { setDocType(type.id); setStep(2); }}
-                    className={`p-4 sm:p-5 rounded-2xl border transition-all text-left hover-lift active:scale-98 cursor-pointer ${docType === type.id ? 'border-[#0B477A] glass-navy-subtle shadow-md ring-2 ring-[#0B477A]/25' : 'border-white/80 glass-card hover:bg-white'}`}
+                    className={`p-4 sm:p-4.5 rounded-xl border transition-all text-left hover-lift active:scale-98 cursor-pointer ${docType === type.id ? 'border-[#0B477A] glass-navy-subtle shadow-xs ring-2 ring-[#0B477A]/30' : 'border-slate-300/80 glass-card hover:bg-white'}`}
                   >
-                    <div className="font-bold text-[#0B477A]">{type.label}</div>
-                    <div className="text-xs text-[#615D73] mt-1">Official {type.label} issued by Govt.</div>
+                    <div className="font-bold text-xs sm:text-sm text-[#0B477A]">{type.label}</div>
+                    <div className="text-[11px] text-[#615D73] mt-1 leading-snug">{type.desc}</div>
                   </button>
                 ))}
               </div>

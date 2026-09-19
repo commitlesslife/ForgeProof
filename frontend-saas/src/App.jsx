@@ -9,8 +9,6 @@ import AuditPage from './pages/AuditPage'
 import SystemReadinessPage from './pages/SystemReadinessPage'
 import AdvisoriesPage from './pages/AdvisoriesPage'
 
-import { LanguageProvider } from './utils/LanguageContext'
-
 export default function App() {
   const [officer, setOfficer] = useState(() => {
     try {
@@ -92,28 +90,22 @@ export default function App() {
   }
 
   if (!officer) {
-    return (
-      <LanguageProvider>
-        <LoginPage onLogin={handleLogin} />
-      </LanguageProvider>
-    )
+    return <LoginPage onLogin={handleLogin} />
   }
 
   return (
-    <LanguageProvider>
-      <PortalShell 
-        activePage={activePage} 
-        onNavigate={handleNavigate}
-        officer={officer}
-        onLogout={handleLogout}
-      >
-        {activePage === 'overview' && <OverviewPage cases={cases} onViewCase={handleViewCase} onNavigate={handleNavigate} />}
-        {activePage === 'capture' && <CaptureStationPage onComplete={handleCaptureComplete} onCancel={() => handleNavigate('overview')} />}
-        {activePage === 'case_detail' && <CaseDetailPage caseId={selectedCaseId} officer={officer} onBack={() => handleNavigate('overview')} />}
-        {activePage === 'audit' && <AuditPage />}
-        {activePage === 'readiness' && <SystemReadinessPage onNavigate={handleNavigate} />}
-        {activePage === 'advisories' && <AdvisoriesPage />}
-      </PortalShell>
-    </LanguageProvider>
+    <PortalShell 
+      activePage={activePage} 
+      onNavigate={handleNavigate}
+      officer={officer}
+      onLogout={handleLogout}
+    >
+      {activePage === 'overview' && <OverviewPage cases={cases} onViewCase={handleViewCase} onNavigate={handleNavigate} />}
+      {activePage === 'capture' && <CaptureStationPage onComplete={handleCaptureComplete} onCancel={() => handleNavigate('overview')} />}
+      {activePage === 'case_detail' && <CaseDetailPage caseId={selectedCaseId} officer={officer} onBack={() => handleNavigate('overview')} />}
+      {activePage === 'audit' && <AuditPage />}
+      {activePage === 'readiness' && <SystemReadinessPage onNavigate={handleNavigate} />}
+      {activePage === 'advisories' && <AdvisoriesPage />}
+    </PortalShell>
   )
 }

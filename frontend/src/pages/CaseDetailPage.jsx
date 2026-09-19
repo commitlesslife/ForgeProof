@@ -682,52 +682,59 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
           </section>
 
           {/* Officer Decision & Cryptographic Sign-Off Module */}
-          <section className="glass-effect rounded-[28px] p-5 space-y-4">
+          <section className="glass-effect rounded-2xl p-4 sm:p-5 space-y-3.5 border border-slate-300/80 shadow-xs">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-[#615D73]">Human-In-The-Loop</p>
-              <h2 className="text-lg font-extrabold text-[#0B477A]">Officer Final Decision</h2>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] font-mono font-black uppercase tracking-wider bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">
+                  SECTION 14 FOREIGNERS ACT
+                </span>
+                <span className="text-[10px] font-mono text-emerald-800 font-bold">● MANDATORY ADJUDICATION</span>
+              </div>
+              <h2 className="text-base font-black text-[#0B477A] mt-1">OFFICER STATUTORY VERDICT</h2>
+              <p className="text-[11px] text-[#615D73]">Recorded to immutable SHA-256 ledger under officer digital signature.</p>
             </div>
 
-            <div className="text-xs text-[#615D73] bg-white/60 p-2.5 rounded-xl border border-[#615D73]/20">
-              Assigned Screener: <strong className="text-[#0B477A]">{officer?.full_name || 'Inspector'} ({officer?.badge_number || 'SEC-001'})</strong>
+            <div className="text-[11px] text-[#615D73] bg-white/80 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+              <span>Screener: <strong className="text-[#0B477A]">{officer?.full_name || 'Inspector'}</strong></span>
+              <span className="font-mono text-[#0B477A] font-bold bg-slate-100 px-1.5 py-0.5 rounded">{officer?.badge_number || 'SEC-001'}</span>
             </div>
 
             <div className="grid gap-2">
               {[
                 { 
                   id: 'APPROVED', 
-                  label: 'Clear & Approve', 
-                  desc: 'Permit entry/clearance standard verification',
+                  label: 'STATUTORY CLEARANCE (FORM B-102)', 
+                  desc: 'Grant border entry / credential verified genuine',
                   hoverClass: 'btn-hover-clear',
-                  activeClass: 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30'
+                  activeClass: 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                 },
                 { 
                   id: 'SECONDARY_REVIEW', 
-                  label: 'Refer to Secondary', 
-                  desc: 'Supervisor manual physical check required',
+                  label: 'REFER TO SECONDARY INSPECTION', 
+                  desc: 'Senior supervisor manual examination required',
                   hoverClass: 'btn-hover-secondary',
-                  activeClass: 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/30'
+                  activeClass: 'bg-amber-600 text-white border-amber-600 shadow-sm'
                 },
                 { 
                   id: 'DENIED_DETAIN', 
-                  label: 'Detain & Reject', 
-                  desc: 'Flag fraudulent presentation & detain traveler',
+                  label: 'ENTRY DENIED / DETAIN TRAVELER', 
+                  desc: 'Fraudulent presentation / intercept under statutory warrant',
                   hoverClass: 'btn-hover-detain',
-                  activeClass: 'bg-[#D30B0D] text-white border-[#D30B0D] shadow-md shadow-[#D30B0D]/30'
+                  activeClass: 'bg-[#D30B0D] text-white border-[#D30B0D] shadow-sm'
                 }
               ].map(opt => (
                 <button
                   key={opt.id}
                   onClick={() => setDecision(opt.id)}
                   disabled={isVerified}
-                  className={`p-3 rounded-2xl border text-left transition cursor-pointer disabled:cursor-not-allowed ${opt.hoverClass} ${
+                  className={`p-2.5 rounded-lg border text-left transition cursor-pointer disabled:cursor-not-allowed ${opt.hoverClass} ${
                     decision === opt.id 
-                      ? `${opt.activeClass} font-bold scale-[1.01]` 
-                      : 'bg-white/70 border-[#615D73]/20 text-[#615D73]'
+                      ? `${opt.activeClass} font-bold` 
+                      : 'bg-white/80 border-slate-200 text-[#615D73]'
                   }`}
                 >
-                  <div className="font-bold text-xs">{opt.label}</div>
-                  <div className={`text-[11px] ${decision === opt.id ? 'opacity-90' : 'text-[#615D73]/70'}`}>
+                  <div className="font-mono text-xs font-black tracking-tight">{opt.label}</div>
+                  <div className={`text-[10px] ${decision === opt.id ? 'opacity-90' : 'text-[#615D73]/80'}`}>
                     {opt.desc}
                   </div>
                 </button>
@@ -743,37 +750,40 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
                   placeholder={
                     decision === 'APPROVED' 
                       ? "Optional inspector clearance note..." 
-                      : "Mandatory justification note explaining cause of referral/detention..."
+                      : "Mandatory statutory justification explaining cause of referral or detention..."
                   }
-                  className="w-full min-h-20 rounded-2xl border border-[#615D73]/25 bg-white/80 p-3 text-xs text-[#0B477A] placeholder:text-[#615D73]/60 focus:ring-2 focus:ring-[#0B477A]/20 focus:border-[#0B477A] outline-none transition disabled:opacity-60"
+                  className="w-full min-h-20 rounded-lg border border-slate-300 bg-white/90 p-2.5 text-xs text-[#0B477A] placeholder:text-[#615D73]/60 focus:ring-2 focus:ring-[#0B477A]/20 focus:border-[#0B477A] outline-none transition disabled:opacity-60 font-medium"
                 />
 
                 {!isVerified ? (
                   <button
                     onClick={handleSubmitDecision}
                     disabled={isSubmitting || (decision !== 'APPROVED' && !note.trim())}
-                    className="w-full py-3.5 rounded-2xl bg-[#D30B0D] font-bold text-white text-xs hover:bg-[#b0090b] transition hover-lift disabled:opacity-50 cursor-pointer shadow-lg shadow-[#D30B0D]/25 flex items-center justify-center gap-2 active:scale-[0.98]"
+                    className="w-full py-3 rounded-lg bg-[#0B477A] hover:bg-[#073359] font-mono font-black text-white text-xs transition disabled:opacity-50 cursor-pointer shadow-md flex items-center justify-center gap-2 active:scale-[0.98]"
                   >
                     {isSubmitting ? (
                       <>
                         <span className="size-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        Writing to Cryptographic Ledger...
+                        SEALING ONTO CRYPTOGRAPHIC LEDGER...
                       </>
                     ) : (
                       <>
-                        <Check size={15} />
-                        Confirm & Sign Immutable Verdict
+                        <ShieldCheck size={16} />
+                        SIGN & SEAL STATUTORY ADJUDICATION
                       </>
                     )}
                   </button>
                 ) : (
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-1">
-                    <p className="font-bold flex items-center gap-1.5">
-                      <CheckCircle2 size={14} /> Decision Sealed in Audit Ledger
-                    </p>
-                    <p className="text-[11px] text-emerald-700 font-mono truncate">
-                      Hash: {caseData.audit_entry?.entry_hash || recordedReceipt?.entry_hash || 'SHA256_SEALED'}
-                    </p>
+                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-bold space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 size={14} className="text-emerald-700" />
+                      <span>OFFICIAL VERDICT CRYPTOGRAPHICALLY SEALED</span>
+                    </div>
+                    {caseData.officer_decision?.notes && (
+                      <p className="text-[11px] font-normal text-emerald-800 italic">
+                        "{caseData.officer_decision.notes}"
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
