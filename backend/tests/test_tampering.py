@@ -16,6 +16,11 @@ from app.modules.tampering_engine import (
     inspect_metadata_forensics,
     run_comprehensive_forensics,
 )
+from app.modules.neural_tamper_engine import (
+    analyze_neural_tampering,
+    DeepForensicCNN,
+    get_neural_forensic_model,
+)
 
 
 class TestTamperingEngine(unittest.TestCase):
@@ -32,6 +37,27 @@ class TestTamperingEngine(unittest.TestCase):
             os.rmdir(self.temp_dir)
         except Exception:
             pass
+
+    def test_neural_tamper_engine(self):
+        img_path = os.path.join(self.temp_dir, "neural_doc.jpg")
+        heatmap_path = os.path.join(self.temp_dir, "neural_heatmap.jpg")
+
+        # Create test document image with synthetic patch discontinuity
+        img = np.full((500, 700, 3), 230, dtype=np.uint8)
+        # Spliced portrait region with different noise frequency
+        img[100:300, 50:250] = np.random.randint(50, 150, (200, 200, 3), dtype=np.uint8)
+        cv2.imwrite(img_path, img)
+
+        res = analyze_neural_tampering(img_path, heatmap_path)
+        self.assertTrue(os.path.exists(heatmap_path))
+        self.assertIn("neural_score", res)
+        self.assertIn("anomaly_detected", res)
+        self.assertIn("latent_variance", res)
+        self.assertIn("confidence", res)
+        self.assertIn("model_architecture", res)
+        self.assertEqual(res["model_architecture"], "ForgeProof SRM-ResNet CNN (PyTorch Edge)")
+        self.assertGreaterEqual(res["neural_score"], 0.0)
+        self.assertLessEqual(res["neural_score"], 100.0)
 
     def test_ela_computation_and_heatmap(self):
         img_path = os.path.join(self.temp_dir, "doc.jpg")
@@ -77,10 +103,22 @@ class TestTamperingEngine(unittest.TestCase):
 
         res = run_comprehensive_forensics(img_path, self.temp_dir, "CASE_TEST")
         self.assertIn("tampering_score", res)
+        self.assertIn("classical_score", res)
+        self.assertIn("neural_score", res)
+        self.assertIn("pipeline", res)
+        self.assertIn("neural", res)
         self.assertIn("is_tampered", res)
         self.assertIn("evidence_list", res)
         self.assertIn("ela_heatmap_url", res)
+        self.assertIn("boundary_overlay_url", res)
+        self.assertIn("neural_heatmap_url", res)
+        
+        # Verify heatmaps actually generated on disk
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "CASE_TEST_ela.jpg")))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "CASE_TEST_edges.jpg")))
+        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "CASE_TEST_neural.jpg")))
 
 
 if __name__ == "__main__":
     unittest.main()
+

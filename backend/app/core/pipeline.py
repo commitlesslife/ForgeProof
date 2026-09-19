@@ -293,7 +293,20 @@ def run_preset_scenario_pipeline(
         validate_icao_mrz(mrz_data)
         viz_data = {"doc_number": "Z4829103", "full_name": "ROHIT SHARMA", "nationality": "INDIAN", "expiry_date": "09/01/2031"}
         validation_res = {"mrz": mrz_data, "viz_fields": viz_data, "cross_validation": cross_validate_mrz_and_viz(viz_data, mrz_data)}
-        tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
+        tampering_res.update({
+            "tampering_score": 5.0,
+            "classical_score": 4.5,
+            "neural_score": 5.5,
+            "pipeline": {
+                "classical_score": 4.5,
+                "neural_score": 5.5,
+                "composite_score": 5.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
+            "is_tampered": False,
+            "evidence_list": []
+        })
         face_res = face_res or {"success": True, "match_score": 94.2, "is_match": True, "face_risk": 5.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
     elif preset_id in ("scenario2_photo_splice", "deck_photo_splice"):
@@ -304,9 +317,19 @@ def run_preset_scenario_pipeline(
         validation_res = {"mrz": mrz_data, "viz_fields": viz_data, "cross_validation": cross_validate_mrz_and_viz(viz_data, mrz_data)}
         tampering_res.update({
             "tampering_score": 88.0, 
+            "classical_score": 90.0,
+            "neural_score": 86.0,
+            "pipeline": {
+                "classical_score": 90.0,
+                "neural_score": 86.0,
+                "composite_score": 88.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
             "is_tampered": True,
             "evidence_list": [
-                {"type": "PHOTO_SPLICE", "severity": "CRITICAL", "title": "Boundary Edge Splice Detected", "description": "High-frequency edge variance around passport portrait border indicating physical photograph replacement."}
+                {"type": "PHOTO_SPLICE", "severity": "CRITICAL", "title": "Boundary Edge Splice Detected", "description": "High-frequency edge variance around passport portrait border indicating physical photograph replacement."},
+                {"type": "NEURAL_ANOMALY", "severity": "CRITICAL", "title": "Deep Neural Tampering Anomaly", "description": "SRM-ResNet CNN detected synthetic/inpainting anomalies (Score: 86.0%, Confidence: 98%). Zones: PORTRAIT_PHOTO_QUADRANT (Neural Feature Divergence)."}
             ]
         })
         face_res = face_res or {"success": True, "match_score": 21.5, "is_match": False, "face_risk": 88.0}
@@ -326,9 +349,19 @@ def run_preset_scenario_pipeline(
         }
         tampering_res.update({
             "tampering_score": 80.0,
+            "classical_score": 82.0,
+            "neural_score": 78.0,
+            "pipeline": {
+                "classical_score": 82.0,
+                "neural_score": 78.0,
+                "composite_score": 80.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
             "is_tampered": True,
             "evidence_list": [
-                {"type": "DATE_TAMPERING", "severity": "HIGH", "title": "Optical Character Alteration", "description": "Printed date of expiry altered from 2031 to 2036."}
+                {"type": "DATE_TAMPERING", "severity": "HIGH", "title": "Optical Character Alteration", "description": "Printed date of expiry altered from 2031 to 2036."},
+                {"type": "NEURAL_ANOMALY", "severity": "HIGH", "title": "Deep Neural Tampering Anomaly", "description": "SRM-ResNet CNN flagged residual variance spike in typography grid."}
             ]
         })
         face_res = face_res or {"success": True, "match_score": 91.0, "is_match": True, "face_risk": 9.0}
@@ -349,7 +382,20 @@ def run_preset_scenario_pipeline(
                 "issuing_authority": "UIDAI (Unique Identification Authority of India)"
             }
         }
-        tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
+        tampering_res.update({
+            "tampering_score": 5.0,
+            "classical_score": 4.0,
+            "neural_score": 6.0,
+            "pipeline": {
+                "classical_score": 4.0,
+                "neural_score": 6.0,
+                "composite_score": 5.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
+            "is_tampered": False,
+            "evidence_list": []
+        })
         face_res = face_res or {"success": True, "match_score": 94.0, "is_match": True, "face_risk": 6.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
     elif preset_id in ("scenario5_tampered_aadhaar", "scenario5_tampered_aadhaar_invalid_verhoeff", "deck_verhoeff_fail"):
@@ -370,6 +416,15 @@ def run_preset_scenario_pipeline(
         }
         tampering_res.update({
             "tampering_score": 92.0,
+            "classical_score": 90.0,
+            "neural_score": 94.0,
+            "pipeline": {
+                "classical_score": 90.0,
+                "neural_score": 94.0,
+                "composite_score": 92.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
             "is_tampered": True,
             "evidence_list": [
                 {"type": "CHECKSUM_VIOLATION", "severity": "CRITICAL", "title": "UIDAI Verhoeff Checksum Failure", "description": "12-digit Aadhaar UID number violates mathematical dihedral group D5 check digit."}
@@ -400,7 +455,20 @@ def run_preset_scenario_pipeline(
                 "status_banner": "🚨 CRITICAL INTERPOL RED NOTICE HIT: ACTIVE INTERNATIONAL ARREST WARRANT"
             }
         }
-        tampering_res.update({"tampering_score": 5.0, "is_tampered": False, "evidence_list": []})
+        tampering_res.update({
+            "tampering_score": 5.0,
+            "classical_score": 4.5,
+            "neural_score": 5.5,
+            "pipeline": {
+                "classical_score": 4.5,
+                "neural_score": 5.5,
+                "composite_score": 5.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
+            "is_tampered": False,
+            "evidence_list": []
+        })
         face_res = face_res or {"success": True, "match_score": 94.2, "is_match": True, "face_risk": 5.0}
         risk_res = {
             "composite_score": 100.0,
@@ -417,6 +485,15 @@ def run_preset_scenario_pipeline(
         validation_res = {"viz_fields": viz_data}
         tampering_res.update({
             "tampering_score": 70.0,
+            "classical_score": 75.0,
+            "neural_score": 65.0,
+            "pipeline": {
+                "classical_score": 75.0,
+                "neural_score": 65.0,
+                "composite_score": 70.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
             "is_tampered": True,
             "stamp": {
                 "has_stamp": True,
@@ -431,6 +508,7 @@ def run_preset_scenario_pipeline(
         })
         face_res = face_res or {"success": True, "match_score": 93.0, "is_match": True, "face_risk": 7.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+
     else:
         # Fallback to standard screening pipeline
         return process_screening_pipeline(doc_path=doc_path, live_path=live_path, doc_type=doc_type, case_id=case_id)

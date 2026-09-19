@@ -20,6 +20,7 @@ from app.config import (
     ELA_ANOMALY_SPIKE_THRESHOLD,
     BOUNDARY_EDGE_VARIANCE_THRESHOLD,
 )
+from app.modules.neural_tamper_engine import analyze_neural_tampering
 
 
 # =============================================================================
@@ -359,7 +360,9 @@ def run_comprehensive_forensics(
     """
     ela_path = os.path.join(output_dir, f"{doc_id}_ela.jpg")
     edge_path = os.path.join(output_dir, f"{doc_id}_edges.jpg")
+    neural_path = os.path.join(output_dir, f"{doc_id}_neural.jpg")
 
+    # Pipeline A: Classical Mathematical Signal Forensics (BSA 2023 Compliant)
     ela_res = compute_ela_heatmap(image_path, ela_path)
     boundary_res = analyze_photo_boundary(image_path, edge_path)
     noise_res = analyze_noise_consistency(image_path)
@@ -379,7 +382,7 @@ def run_comprehensive_forensics(
         
     meta_res = inspect_metadata_forensics(image_path)
 
-    # Weighted aggregate tampering score
+    # Weighted aggregate score for Pipeline A (Classical Signal Forensics)
     weights = [0.35, 0.35, 0.15, 0.15]
     scores = [
         ela_res.get("tampering_score", 0.0),
@@ -388,8 +391,15 @@ def run_comprehensive_forensics(
         stamp_res.get("stamp_score", 0.0),
     ]
 
-    composite_tamper_score = sum(w * s for w, s in zip(weights, scores))
-    composite_tamper_score = min(100.0, max(0.0, composite_tamper_score))
+    classical_score = sum(w * s for w, s in zip(weights, scores))
+    classical_score = round(min(100.0, max(0.0, classical_score)), 1)
+
+    # Pipeline B: Deep Learning Neural Forensics (SRM-ResNet CNN)
+    neural_res = analyze_neural_tampering(image_path, neural_path)
+    neural_score = round(float(neural_res.get("neural_score", 0.0)), 1)
+
+    # Unified Dual-Pipeline Composite Score (50% Classical Math + 50% Neural AI)
+    composite_tamper_score = round(0.50 * classical_score + 0.50 * neural_score, 1)
 
     # Compile forensic evidence items
     evidence: List[Dict[str, str]] = []
@@ -434,15 +444,36 @@ def run_comprehensive_forensics(
             "description": f"Image contains editing traces: {', '.join(meta_res.get('flags', []))}"
         })
 
+    if neural_res.get("anomaly_detected"):
+        zones_str = ", ".join(neural_res.get("flagged_zones", [])) or "Latent Feature Inconsistency"
+        evidence.append({
+            "type": "NEURAL_ANOMALY",
+            "severity": "CRITICAL" if neural_score > 60 else "HIGH",
+            "title": "Deep Neural Tampering Anomaly",
+            "description": f"SRM-ResNet CNN detected synthetic/inpainting anomalies (Score: {neural_score}%, Confidence: {int(neural_res.get('confidence', 0.9)*100)}%). Zones: {zones_str}."
+        })
+
     return {
-        "tampering_score": round(composite_tamper_score, 1),
+        "tampering_score": composite_tamper_score,
         "is_tampered": composite_tamper_score > 35.0,
+        "classical_score": classical_score,
+        "neural_score": neural_score,
+        "pipeline": {
+            "classical_score": classical_score,
+            "neural_score": neural_score,
+            "composite_score": composite_tamper_score,
+            "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+            "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+        },
         "ela": ela_res,
         "boundary": boundary_res,
         "noise": noise_res,
         "stamp": stamp_res,
         "metadata": meta_res,
+        "neural": neural_res,
         "evidence_list": evidence,
         "ela_heatmap_url": f"/static/forensics/{os.path.basename(ela_path)}",
-        "boundary_overlay_url": f"/static/forensics/{os.path.basename(edge_path)}"
+        "boundary_overlay_url": f"/static/forensics/{os.path.basename(edge_path)}",
+        "neural_heatmap_url": f"/static/forensics/{os.path.basename(neural_path)}"
     }
+
