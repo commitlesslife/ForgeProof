@@ -9,14 +9,18 @@ const LanguageContext = createContext({
 })
 
 export function LanguageProvider({ children }) {
+  // English is STRICTLY the default whenever the website is loaded
   const [lang, setLangState] = useState(() => {
-    if (typeof window === 'undefined') return 'en'
-    return localStorage.getItem('forgeproof_lang') || 'en' // English is DEFAULT
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('forgeproof_lang')
+      }
+    } catch (_) {}
+    return 'en'
   })
 
   const setLang = (newLang) => {
     setLangState(newLang)
-    localStorage.setItem('forgeproof_lang', newLang)
   }
 
   const toggleLang = () => {

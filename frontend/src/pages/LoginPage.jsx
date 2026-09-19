@@ -65,10 +65,10 @@ export default function LoginPage({ onLogin }) {
             <AshokaEmblem className="h-16 w-auto drop-shadow-xs" />
           </div>
           <div className="text-[11px] font-bold uppercase tracking-wider text-[#003366]">
-            GOVERNMENT OF INDIA · भारत सरकार
+            GOVERNMENT OF INDIA
           </div>
           <div className="text-xs font-bold uppercase tracking-wider text-slate-700">
-            MINISTRY OF HOME AFFAIRS · गृह मंत्रालय
+            MINISTRY OF HOME AFFAIRS
           </div>
           <div className="text-sm font-black uppercase tracking-tight text-[#D30B0D] mt-0.5">
             BUREAU OF IMMIGRATION

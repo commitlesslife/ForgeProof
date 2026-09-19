@@ -214,18 +214,14 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
             <AshokaEmblem className="h-14 sm:h-16 shrink-0" />
             
             <div className="border-l-2 border-slate-300 pl-3.5 sm:pl-4">
-              <div className="text-[11px] sm:text-xs font-semibold text-[#003366] tracking-wide leading-tight flex items-center gap-2">
+              <div className="text-[11px] sm:text-xs font-semibold text-[#003366] tracking-wide leading-tight">
                 <span className="font-bold">{lang === 'hi' ? 'भारत सरकार' : 'GOVERNMENT OF INDIA'}</span>
-                <span className="text-slate-400 font-normal">|</span>
-                <span className="text-slate-600 font-medium">{lang === 'hi' ? 'Government of India' : 'भारत सरकार'}</span>
               </div>
-              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 tracking-wide leading-tight flex items-center gap-2 mt-0.5">
+              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 tracking-wide leading-tight mt-0.5">
                 <span className="font-bold">{lang === 'hi' ? 'गृह मंत्रालय' : 'MINISTRY OF HOME AFFAIRS'}</span>
-                <span className="text-slate-400 font-normal">|</span>
-                <span className="text-slate-600 font-medium">{lang === 'hi' ? 'Ministry of Home Affairs' : 'गृह मंत्रालय'}</span>
               </div>
               <div className="text-sm sm:text-base font-bold text-[#003366] font-gov-serif tracking-normal mt-0.5">
-                {lang === 'hi' ? 'आव्रजन ब्यूरो · BUREAU OF IMMIGRATION' : 'BUREAU OF IMMIGRATION · आव्रजन ब्यूरो'}
+                {lang === 'hi' ? 'आव्रजन ब्यूरो' : 'BUREAU OF IMMIGRATION'}
               </div>
               <div className="text-xs sm:text-sm font-bold text-[#003366] tracking-tight flex items-center gap-1.5 mt-0.5">
                 <span className="font-black text-[#003366]">ForgeProof</span>
