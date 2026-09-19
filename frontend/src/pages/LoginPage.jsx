@@ -162,11 +162,36 @@ export default function LoginPage({ onLogin }) {
           </div>
         </div>
 
-        {/* Demo Quick Fill Hint */}
-        <div className="mt-3 text-center">
-          <p className="text-[11px] text-slate-500">
-            Hackathon Reviewer Credentials: <strong className="font-mono text-slate-700">admin</strong> / <strong className="font-mono text-slate-700">admin123</strong>
-          </p>
+        {/* Quick Fill Preset Buttons for Hackathon Reviewers */}
+        <div className="mt-3.5 text-center space-y-2">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-600 font-bold">
+            <KeyRound size={13} className="text-[#003366]" />
+            <span>Hackathon Reviewer Credentials (Click to Auto-Fill):</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => { setOfficerId('admin'); setPassword('admin123'); setErrorMsg(''); }}
+              className="px-3 py-1.5 text-xs rounded-md border border-[#003366]/30 bg-white hover:bg-slate-50 font-mono text-[#003366] font-bold transition active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 hover:border-[#003366]"
+              title="Auto-fill admin reviewer credentials"
+            >
+              <span className="font-semibold text-slate-500 font-sans">Admin:</span>
+              <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[#003366]">admin</span>
+              <span className="text-slate-400">/</span>
+              <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin123</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOfficerId('OFFICER_IND_829'); setPassword('border-secure-2026'); setErrorMsg(''); }}
+              className="px-3 py-1.5 text-xs rounded-md border border-[#003366]/30 bg-white hover:bg-slate-50 font-mono text-[#003366] font-bold transition active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 hover:border-[#003366]"
+              title="Auto-fill border inspector credentials"
+            >
+              <span className="font-semibold text-slate-500 font-sans">Inspector:</span>
+              <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[#003366]">OFFICER_IND_829</span>
+              <span className="text-slate-400">/</span>
+              <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">border-secure-2026</span>
+            </button>
+          </div>
         </div>
       </div>
 

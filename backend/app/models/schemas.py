@@ -224,7 +224,8 @@ class OfficerDecision(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    officer_id: str
+    officer_id: Optional[str] = None
+    username: Optional[str] = None
     password: str
 
 

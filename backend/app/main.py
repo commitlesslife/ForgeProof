@@ -239,11 +239,12 @@ def login_officer(req: LoginRequest):
     Authenticates an official border screening officer with hashed password verification.
     Supports official accounts (e.g. OFFICER_IND_829) and 'admin' / 'admin' bypass.
     """
-    officer = verify_officer_credentials(req.officer_id, req.password)
+    target_id = (req.officer_id or req.username or "").strip()
+    officer = verify_officer_credentials(target_id, req.password)
     if not officer:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Officer ID or password. Access denied."
+            detail="Invalid Officer ID or password. Access denied. (Demo: admin / admin123)"
         )
     
     token = create_officer_session(officer)

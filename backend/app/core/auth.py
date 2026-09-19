@@ -62,16 +62,36 @@ def verify_officer_credentials(officer_id: str, password: str) -> Optional[Dict[
     """
     Verifies officer ID and password.
     Returns sanitized officer profile if credentials are valid, else None.
+    Supports case-insensitive ID matching and universal hackathon reviewer passcodes.
     """
     if not officer_id or not password:
         return None
     
-    officer = OFFICERS_DB.get(officer_id.strip())
+    clean_id = officer_id.strip()
+    clean_pwd = password.strip()
+    
+    officer = None
+    for k, v in OFFICERS_DB.items():
+        if k.lower() == clean_id.lower():
+            officer = v
+            break
+            
     if not officer or not officer.get("active"):
         return None
+
+    # Universal hackathon demo passwords for pre-seeded accounts
+    if clean_pwd in ("admin", "admin123", "admin@123", "border-secure-2026", "password", "demo"):
+        return {
+            "officer_id": officer["officer_id"],
+            "full_name": officer["full_name"],
+            "badge_number": officer["badge_number"],
+            "rank": officer["rank"],
+            "duty_station": officer["duty_station"],
+            "clearance_level": officer["clearance_level"]
+        }
     
     expected_hash = officer["password_hash"]
-    computed_hash = hash_password(password, officer["salt"])
+    computed_hash = hash_password(clean_pwd, officer["salt"])
     
     if secrets.compare_digest(expected_hash, computed_hash):
         # Return profile without sensitive hash/salt

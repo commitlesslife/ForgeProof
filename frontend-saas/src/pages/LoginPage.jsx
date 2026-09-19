@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShieldCheck, Sparkles, AlertCircle, UserCheck } from 'lucide-react'
+import { ShieldCheck, Sparkles, AlertCircle, UserCheck, KeyRound } from 'lucide-react'
 import { API_BASE } from '../config'
 
 export default function LoginPage({ onLogin }) {
@@ -112,9 +112,41 @@ export default function LoginPage({ onLogin }) {
                 )}
               </button>
             </form>
-            <p className="mt-5 text-center text-xs leading-relaxed text-[#615D73]">
+            <p className="mt-4 text-center text-xs leading-relaxed text-[#615D73]">
               Government Border Screening System · Authorized Personnel Only
             </p>
+
+            {/* Quick Fill Preset Buttons for Hackathon Reviewers */}
+            <div className="mt-4 pt-3 border-t border-[#615D73]/15 text-center space-y-2">
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#615D73] font-bold">
+                <KeyRound size={13} className="text-[#0B477A]" />
+                <span>Hackathon Reviewer Credentials (Click to Auto-Fill):</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setOfficerId('admin'); setPassword('admin123'); setErrorMsg(''); }}
+                  className="px-3 py-1.5 text-xs rounded-xl border border-[#615D73]/20 bg-white/90 hover:bg-white font-mono text-[#0B477A] font-bold transition active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 hover:border-[#0B477A]"
+                  title="Auto-fill admin reviewer credentials"
+                >
+                  <span className="font-semibold text-slate-500 font-sans">Admin:</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[#0B477A]">admin</span>
+                  <span className="text-slate-400">/</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin123</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setOfficerId('OFFICER_IND_829'); setPassword('border-secure-2026'); setErrorMsg(''); }}
+                  className="px-3 py-1.5 text-xs rounded-xl border border-[#615D73]/20 bg-white/90 hover:bg-white font-mono text-[#0B477A] font-bold transition active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 hover:border-[#0B477A]"
+                  title="Auto-fill border inspector credentials"
+                >
+                  <span className="font-semibold text-slate-500 font-sans">Inspector:</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[#0B477A]">OFFICER_IND_829</span>
+                  <span className="text-slate-400">/</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">border-secure-2026</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
