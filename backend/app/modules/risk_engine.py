@@ -48,11 +48,16 @@ def compute_composite_risk(
     if cross_val and not cross_val.get("is_consistent", True):
         val_risk += 55.0
         for disc in cross_val.get("discrepancies", []):
-            field_name = disc.get("field", "Field")
+            if isinstance(disc, dict):
+                field_name = disc.get("field", "Field")
+                detail_text = disc.get("message") or f"The printed {field_name.lower()} does not match the encoded data strip. The document text was altered."
+            else:
+                field_name = "Field"
+                detail_text = str(disc)
             val_evidence.append({
                 "severity": "CRITICAL",
                 "title": f"Mismatched {field_name}",
-                "detail": f"The printed {field_name.lower()} does not match the encoded data strip. The document text was altered."
+                "detail": detail_text
             })
 
     # Indian National ID Checks (Aadhaar, PAN, DL)

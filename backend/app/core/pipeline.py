@@ -12,6 +12,7 @@ Coordinates end-to-end identity screening:
 """
 
 import os
+import shutil
 import uuid
 from typing import Dict, Any, Optional, List
 
@@ -279,13 +280,15 @@ def run_preset_scenario_pipeline(
     Kept completely separate from the production screening pipeline.
     """
     case_id = f"CASE_PRESET_{uuid.uuid4().hex[:6].upper()}"
-    preprocess_image(doc_path)
-    quality_res = evaluate_image_quality(doc_path)
-    tampering_res = run_comprehensive_forensics(doc_path, str(FORENSICS_DIR), case_id, doc_type=doc_type)
+    doc_copy_path = os.path.join(str(UPLOADS_DIR), f"{case_id}_{os.path.basename(doc_path)}")
+    shutil.copyfile(doc_path, doc_copy_path)
+    preprocess_image(doc_copy_path)
+    quality_res = evaluate_image_quality(doc_copy_path)
+    tampering_res = run_comprehensive_forensics(doc_copy_path, str(FORENSICS_DIR), case_id, doc_type=doc_type)
     
     face_res = None
     if live_path and os.path.exists(live_path):
-        face_res = verify_faces(doc_path, live_path, str(FACES_DIR), case_id)
+        face_res = verify_faces(doc_copy_path, live_path, str(FACES_DIR), case_id)
 
     if preset_id in ("scenario1_genuine_passport", "deck_authentic"):
         valid_mrz = ["P<INDSHARMA<<ROHIT<<<<<<<<<<<<<<<<<<<<<<<<<", "Z4829103<6IND9408159M3101090<<<<<<<<<<<<<<<4"]
@@ -344,7 +347,14 @@ def run_preset_scenario_pipeline(
             "viz_fields": viz_data,
             "cross_validation": {
                 "is_consistent": False,
-                "discrepancies": ["Document expiry date mismatch: VIZ shows 2036 while MRZ encodes 2031"]
+                "discrepancies": [
+                    {
+                        "field": "Expiry Date",
+                        "viz_value": "09/01/2036",
+                        "mrz_value": "310109",
+                        "message": "Document expiry date mismatch: VIZ shows 2036 while MRZ encodes 2031"
+                    }
+                ]
             }
         }
         tampering_res.update({
@@ -513,7 +523,7 @@ def run_preset_scenario_pipeline(
         # Fallback to standard screening pipeline
         return process_screening_pipeline(doc_path=doc_path, live_path=live_path, doc_type=doc_type, case_id=case_id)
 
-    doc_image_url = f"/static/samples/{os.path.basename(doc_path)}"
+    doc_image_url = f"/static/uploads/{os.path.basename(doc_copy_path)}"
     live_image_url = f"/static/samples/{os.path.basename(live_path)}" if live_path else None
     
     audit_entry = audit_ledger.record_event(

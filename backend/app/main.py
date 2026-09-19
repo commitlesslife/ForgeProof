@@ -563,6 +563,18 @@ def list_presets():
             "live_filename": "presenter_rohit_matching.jpg",
             "doc_type": "VISA",
             "highlights": "Deformed official stamp contour circularity and Adobe Photoshop CC export metadata trace."
+        },
+        {
+            "id": "scenario1_interpol_hit",
+            "title": "Scenario 7: Interpol Red Notice Persona",
+            "subtitle": "Active International Fugitive Warrant",
+            "expected_tier": "CRITICAL",
+            "expected_score": 100.0,
+            "badge": "Interpol Red Notice Hit",
+            "doc_filename": "scenario1_genuine_indian_passport.jpg",
+            "live_filename": "presenter_rohit_matching.jpg",
+            "doc_type": "PASSPORT",
+            "highlights": "Active Interpol Red Notice warrant #2026-9041 matched on passport number and biometric identity."
         }
     ]
 
@@ -570,11 +582,28 @@ def list_presets():
 @app.post("/api/v1/cases/preset/{preset_id}")
 def run_preset_scenario(preset_id: str, live_mode: str = "default"):
     """Runs one of the showcase demo presets in < 1 second."""
+    alias_map = {
+        "deck_authentic": "scenario1_genuine_passport",
+        "deck_photo_splice": "scenario2_photo_splice",
+        "deck_date_fraud": "scenario3_date_fraud",
+        "deck_genuine_aadhaar": "scenario4_genuine_aadhaar",
+        "deck_verhoeff_fail": "scenario5_tampered_aadhaar",
+        "deck_interpol_hit": "scenario1_interpol_hit",
+        "deck_forged_visa": "scenario6_forged_visa",
+        "scenario1_interpol_hit": "scenario1_interpol_hit",
+        "scenario3_tampered_date_mrz_mismatch": "scenario3_date_fraud",
+        "scenario4_genuine_indian_aadhaar": "scenario4_genuine_aadhaar",
+        "scenario5_tampered_aadhaar_invalid_verhoeff": "scenario5_tampered_aadhaar",
+        "scenario6_forged_visa_stamp": "scenario6_forged_visa",
+    }
+    canonical_id = alias_map.get(preset_id, preset_id)
     presets = {p["id"]: p for p in list_presets()}
-    if preset_id not in presets:
-        raise HTTPException(status_code=404, detail="Preset scenario not found")
+    
+    # Also support searching by original preset_id if directly defined
+    p = presets.get(canonical_id) or presets.get(preset_id)
+    if not p:
+        raise HTTPException(status_code=404, detail=f"Preset scenario '{preset_id}' not found")
 
-    p = presets[preset_id]
     doc_path = os.path.join(str(SAMPLES_DIR), p["doc_filename"])
 
     if live_mode == "impersonator":
