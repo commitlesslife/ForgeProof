@@ -367,7 +367,7 @@ To prevent catastrophic single-vector failures from being diluted by otherwise c
 ---
 
 ### 5.10 Module 10: Official Form B-102 Border Clearance Certificate
-- **Purpose**: Provide a standardized, printable border clearance document compliant with Ministry of Home Affairs and Bureau of Immigration specifications.
+- **Purpose**: Provide a standardized, printable border clearance document compliant with Ministry of Home Affairs (Police II Division) and Sashastra Seema Bal (SSB) specifications.
 - **Key Elements**:
   1. **Official Heading**: Government-standard institutional layout with security seals and emblem styling.
   2. **Unique Serial Number**: Formatted as `CERT-IND-{CASE_ID}`.

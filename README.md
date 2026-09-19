@@ -144,7 +144,7 @@ flowchart TD
 
 ### 8. Official Form B-102 Border Clearance Certificate
 - **Government-Standard Admissibility Document**:
-  - Features official Ministry of Home Affairs / Bureau of Immigration styling, unique serial numbers (`CERT-IND-{CASE_ID}`), and an admissibility badge (`CLEARED & ADMISSIBLE`, `SECONDARY REVIEW`, or `ENTRY DENIED`).
+  - Features official Ministry of Home Affairs (Police II Division) / Sashastra Seema Bal (SSB) styling, unique serial numbers (`CERT-IND-{CASE_ID}`), and an admissibility badge (`CLEARED & ADMISSIBLE`, `SECONDARY REVIEW`, or `ENTRY DENIED`).
 - **Comprehensive Verification Matrix & Dynamic Verification QR**:
   - Itemizes results across all 5 verification pillars, embeds the SHA-256 immutable ledger seal, and generates a dynamic scannable QR code for instant field verification and 1-click PDF/paper printing.
 
