@@ -2,10 +2,18 @@
 // In production (e.g. Vercel deployment), if VITE_API_URL is not set, default to the permanent ngrok tunnel.
 const defaultProductionApi = 'https://truce-stride-veal.ngrok-free.dev'
 
-export const API_BASE = (
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? '' : defaultProductionApi)
-).replace(/\/+$/, '')
+function normalizeApiUrl(url) {
+  if (!url) return ''
+  url = url.trim().replace(/\/+$/, '')
+  if (url && !/^https?:\/\//i.test(url)) {
+    url = `https://${url}`
+  }
+  return url
+}
+
+const rawApi = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : defaultProductionApi)
+
+export const API_BASE = normalizeApiUrl(rawApi)
 
 // Automatically bypass ngrok free tier browser warning on all fetch requests
 if (typeof window !== 'undefined' && !window.__ngrokFetchPatched) {
