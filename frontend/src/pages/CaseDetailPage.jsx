@@ -22,7 +22,10 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/cases/${caseId}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      })
       .then(data => {
         setCaseData(data)
         if (data.officer_decision) {
@@ -71,13 +74,15 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
           notes: note || 'Inspection completed by border officer'
         })
       })
-      const result = await res.json()
-      if (result.success) {
+      const result = await res.json().catch(() => ({}))
+      if (res.ok && result.success) {
         setRecordedReceipt(result.audit_entry)
         setCaseData(prev => ({
           ...prev,
           officer_decision: result.officer_decision
         }))
+      } else {
+        alert(result.detail || `Failed to record decision (HTTP ${res.status}).`)
       }
     } catch (err) {
       console.error(err)

@@ -21,10 +21,18 @@ export default function LoginPage({ onLogin }) {
         body: JSON.stringify({ officer_id: officerId.trim(), password })
       })
 
-      const data = await response.json()
+      const contentType = response.headers.get('content-type') || ''
+      let data = {}
+      if (contentType.includes('application/json')) {
+        data = await response.json().catch(() => ({}))
+      }
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Authentication failed. Please verify credentials.')
+        throw new Error(data?.detail || `Authentication failed (HTTP ${response.status}). Please check credentials and backend connectivity.`)
+      }
+
+      if (!data?.token || !data?.officer) {
+        throw new Error('Authentication server returned an invalid response structure.')
       }
 
       onLogin(data.officer, data.token)

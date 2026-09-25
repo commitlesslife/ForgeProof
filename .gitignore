@@ -61,5 +61,7 @@ temp_*.txt
 ref/liquid-glass-ref/
 ref/professional-ui-redesign/
 cloudflared.exe
+ngrok.exe
+ngrok
 
 
