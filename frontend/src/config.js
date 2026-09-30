@@ -35,12 +35,12 @@ if (typeof window !== 'undefined' && !window.__forgeproofFetchPatched) {
     const isLoginEndpoint = url.includes('/api/v1/auth/login')
     if (isApiRequest && !isLoginEndpoint && !headers.has('Authorization')) {
       try {
-        const token = localStorage.getItem('forgeproof_token')
+        const token = sessionStorage.getItem('forgeproof_token') || localStorage.getItem('forgeproof_token')
         if (token) {
           headers.set('Authorization', `Bearer ${token}`)
         }
       } catch {
-        // Ignore localStorage access restrictions
+        // Ignore storage access restrictions
       }
     }
 
