@@ -107,7 +107,7 @@ export default function App() {
         officer={officer}
         onLogout={handleLogout}
       >
-        {activePage === 'overview' && <OverviewPage cases={cases} onViewCase={handleViewCase} onNavigate={handleNavigate} />}
+        {activePage === 'overview' && <OverviewPage cases={cases} onViewCase={handleViewCase} onNavigate={handleNavigate} onRefreshQueue={fetchCases} />}
         {activePage === 'capture' && <CaptureStationPage onComplete={handleCaptureComplete} onCancel={() => handleNavigate('overview')} />}
         {activePage === 'case_detail' && <CaseDetailPage caseId={selectedCaseId} officer={officer} onBack={() => handleNavigate('overview')} />}
         {activePage === 'audit' && <AuditPage />}
