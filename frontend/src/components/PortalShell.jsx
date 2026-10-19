@@ -98,7 +98,7 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
   ]
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#F4F6F9] text-[#1E293B] selection:bg-[#003366] selection:text-white ${fontSize === 'large' ? 'text-base' : fontSize === 'xlarge' ? 'text-lg' : 'text-sm'}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-150 ${isDarkBooth ? 'bg-[#091220] text-slate-100' : 'bg-[#F4F6F9] text-[#1E293B]'} selection:bg-[#003366] selection:text-white ${fontSize === 'large' ? 'text-base' : fontSize === 'xlarge' ? 'text-lg' : 'text-sm'}`}>
       
       {/* 1. National Tricolor Micro-Stripe */}
       <div className="tricolor-stripe" />
@@ -213,24 +213,24 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
       </header>
 
       {/* 3. Main Government Portal Banner & Officer Masthead */}
-      <div className="w-full bg-white border-b-2 border-[#003366] shadow-xs">
+      <div className={`w-full transition-colors duration-150 border-b-2 shadow-xs ${isDarkBooth ? 'bg-[#0B1728] border-b-[#003366]' : 'bg-white border-b-[#003366]'}`}>
         <div className="mx-auto max-w-[1560px] px-4 sm:px-6 py-3.5 sm:py-4 flex flex-wrap items-center justify-between gap-4">
           
           {/* Left: Official Emblem & Department Hierarchy */}
           <div className="flex items-center gap-3.5 sm:gap-5">
             <ForgeProofEmblem className="h-14 sm:h-16 w-auto shrink-0 drop-shadow-xs" />
             
-            <div className="border-l-2 border-slate-200 pl-3.5 sm:pl-4 space-y-0.5">
-              <p className="text-[11px] sm:text-xs font-extrabold text-[#003366] tracking-wide leading-tight uppercase">
+            <div className={`border-l-2 pl-3.5 sm:pl-4 space-y-0.5 ${isDarkBooth ? 'border-slate-700' : 'border-slate-200'}`}>
+              <p className={`text-[11px] sm:text-xs font-extrabold tracking-wide leading-tight uppercase ${isDarkBooth ? 'text-amber-400' : 'text-[#003366]'}`}>
                 {lang === 'hi' ? 'भारत सरकार · गृह मंत्रालय' : 'GOVERNMENT OF INDIA · MINISTRY OF HOME AFFAIRS'}
               </p>
-              <h2 className="text-sm sm:text-base font-extrabold text-[#003366] tracking-tight leading-snug">
+              <h2 className={`text-sm sm:text-base font-extrabold tracking-tight leading-snug ${isDarkBooth ? 'text-white' : 'text-[#003366]'}`}>
                 {lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी) — सीमा नियंत्रण एवं दस्तावेज़ सत्यापन निदेशालय' : 'SASHASTRA SEEMA BAL (SSB) — BORDER & DOCUMENT SCREENING DIRECTORATE'}
               </h2>
-              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-slate-600 font-medium">
+              <div className={`flex flex-wrap items-center gap-2 pt-0.5 text-xs font-medium ${isDarkBooth ? 'text-slate-400' : 'text-slate-600'}`}>
                 <ForgeProofLogo className="h-3.5 sm:h-4 w-auto shrink-0" />
-                <span className="text-slate-300 hidden sm:inline">|</span>
-                <span className="text-[11px] text-slate-500 hidden sm:inline font-mono">
+                <span className={isDarkBooth ? 'text-slate-600 hidden sm:inline' : 'text-slate-300 hidden sm:inline'}>|</span>
+                <span className={`text-[11px] hidden sm:inline font-mono ${isDarkBooth ? 'text-slate-400' : 'text-slate-500'}`}>
                   SIH26188 · MULTI-PILLAR FORENSIC & BIOMETRIC VERIFICATION TERMINAL
                 </span>
               </div>
@@ -238,20 +238,20 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
           </div>
 
           {/* Right: Authenticated Officer Identity Card (Generously Spaced) */}
-          <div className="flex items-center gap-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs">
+          <div className={`flex items-center gap-3.5 rounded-2xl p-3 sm:p-3.5 shadow-xs border transition-colors ${isDarkBooth ? 'bg-[#0F1E33] border-[#1E3555]' : 'bg-slate-50/90 border-slate-200/90'}`}>
             <div className="size-11 rounded-xl bg-[#003366] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
               {officerName.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('') || 'OI'}
             </div>
             
             <div className="min-w-0 pr-1 text-left space-y-0.5">
               <div className="flex items-center gap-2">
-                <p className="font-extrabold text-xs sm:text-sm text-[#003366] truncate">{officerName.toUpperCase()}</p>
+                <p className={`font-extrabold text-xs sm:text-sm truncate ${isDarkBooth ? 'text-white' : 'text-[#003366]'}`}>{officerName.toUpperCase()}</p>
                 <span className="size-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" title="Active On Duty" />
               </div>
-              <p className="text-[11px] font-mono text-slate-600 font-semibold truncate">
-                BADGE: <strong className="text-slate-900">{badgeNo}</strong> · {clearanceLevel.replace('LEVEL_', 'LVL ').replace(/_/g, ' ')}
+              <p className={`text-[11px] font-mono font-semibold truncate ${isDarkBooth ? 'text-slate-300' : 'text-slate-600'}`}>
+                BADGE: <strong className={isDarkBooth ? 'text-amber-300' : 'text-slate-900'}>{badgeNo}</strong> · {clearanceLevel.replace('LEVEL_', 'LVL ').replace(/_/g, ' ')}
               </p>
-              <p className="text-[11px] text-slate-500 font-medium truncate flex items-center gap-1">
+              <p className={`text-[11px] font-medium truncate flex items-center gap-1 ${isDarkBooth ? 'text-slate-400' : 'text-slate-500'}`}>
                 <MapPin size={11} className="text-slate-400 shrink-0" /> {dutyStation}
               </p>
             </div>
@@ -271,7 +271,7 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
       </div>
 
       {/* 4. Full-Width Official Government Navigation Bar */}
-      <nav className="w-full bg-[#003366] text-white shadow-md sticky top-0 z-40 border-b border-[#002244]">
+      <nav className={`w-full text-white shadow-md sticky top-0 z-40 border-b transition-colors ${isDarkBooth ? 'bg-[#061527] border-[#0A223E]' : 'bg-[#003366] border-[#002244]'}`}>
         <div className="mx-auto max-w-[1560px] px-3 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar">
           
           {/* Main Navigation Links with generous padding and readable text */}
@@ -305,33 +305,33 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
       </nav>
 
       {/* 5. Government Breadcrumbs & Security Telemetry Bar */}
-      <div className="w-full bg-[#E8EDF4] border-b border-slate-300/80 text-xs text-slate-600 py-2 px-4 sm:px-6">
+      <div className={`w-full border-b text-xs py-2 px-4 sm:px-6 transition-colors ${isDarkBooth ? 'bg-[#0A1626] border-slate-800 text-slate-300' : 'bg-[#E8EDF4] border-slate-300/80 text-slate-600'}`}>
         <div className="mx-auto max-w-[1560px] flex items-center justify-between gap-4">
           
           {/* Breadcrumb path */}
           <div className="flex items-center gap-1.5 text-[11px] font-medium">
-            <span className="font-bold text-[#003366]">{t('home')}</span>
+            <span className={`font-bold ${isDarkBooth ? 'text-amber-400' : 'text-[#003366]'}`}>{t('home')}</span>
             <ChevronRight size={12} className="text-slate-400" />
-            <span className="text-slate-700">{t('border_desk')}</span>
+            <span className={isDarkBooth ? 'text-slate-300' : 'text-slate-700'}>{t('border_desk')}</span>
             <ChevronRight size={12} className="text-slate-400" />
-            <span className="font-extrabold text-[#003366] uppercase">
+            <span className={`font-extrabold uppercase ${isDarkBooth ? 'text-white' : 'text-[#003366]'}`}>
               {navLinks.find(n => n.id === activePage)?.label || 'Screening'}
             </span>
           </div>
           
           {/* Telemetry Chips */}
-          <div className="hidden sm:flex items-center gap-3.5 text-[10px] font-mono font-semibold text-slate-600">
+          <div className="hidden sm:flex items-center gap-3.5 text-[10px] font-mono font-semibold">
             <span className="flex items-center gap-1.5">
-              <Lock size={11} className="text-emerald-700" />
-              <span>SHA-256 LEDGER ACTIVE</span>
+              <Lock size={11} className={isDarkBooth ? 'text-emerald-400' : 'text-emerald-700'} />
+              <span className={isDarkBooth ? 'text-slate-300' : 'text-slate-600'}>SHA-256 LEDGER ACTIVE</span>
             </span>
             <span className="text-slate-400">|</span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 size={11} className="text-blue-700" />
-              <span>DPDP ACT 2023 COMPLIANT</span>
+              <CheckCircle2 size={11} className={isDarkBooth ? 'text-blue-400' : 'text-blue-700'} />
+              <span className={isDarkBooth ? 'text-slate-300' : 'text-slate-600'}>DPDP ACT 2023 COMPLIANT</span>
             </span>
             <span className="text-slate-400">|</span>
-            <span>STATION: <strong className="text-slate-900 font-bold">ICP-RXL-GATE-01</strong></span>
+            <span className={isDarkBooth ? 'text-slate-300' : 'text-slate-600'}>STATION: <strong className={isDarkBooth ? 'text-white' : 'text-slate-900'}>ICP-RXL-GATE-01</strong></span>
           </div>
 
         </div>

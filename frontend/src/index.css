@@ -197,40 +197,149 @@
   }
 }
 
-/* Low-Glare Ergonomic Dark Booth Mode (Airport Low-Light Booth Operations) */
+/* Low-Glare Ergonomic Dark Booth Mode (Border Station Low-Light Booth Operations) */
 body.dark-booth {
-  background-color: #0B0F17;
-  color: #F1F5F9;
+  background-color: #091220 !important;
+  color: #E2E8F0 !important;
 }
 
+/* Surfaces, cards, and panels */
 body.dark-booth .glass-effect {
-  background-color: #111827;
-  border-color: #1F2937;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  color: #F1F5F9;
+  background-color: #0E1A2C !important;
+  border-color: #1A2E4C !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  color: #E2E8F0;
 }
 
 body.dark-booth .glass-card {
-  background-color: #0F172A;
-  border-color: #1E293B;
-  color: #F1F5F9;
+  background-color: #122137 !important;
+  border-color: #1E3658 !important;
+  color: #E2E8F0;
 }
 
-body.dark-booth h1, 
-body.dark-booth h2, 
-body.dark-booth h3 {
+body.dark-booth .glass-navy-subtle {
+  background-color: #193152 !important;
+  border-color: #264B7A !important;
+  color: #93C5FD !important;
+}
+
+/* Generic white and light slate panels */
+body.dark-booth .bg-white,
+body.dark-booth [class*="bg-white/"] {
+  background-color: #0E1A2C !important;
+  border-color: #1E3350 !important;
+  color: #E2E8F0;
+}
+
+body.dark-booth .bg-slate-50,
+body.dark-booth .bg-slate-100,
+body.dark-booth .bg-slate-200 {
+  background-color: #13243C !important;
+  border-color: #1E385D !important;
+  color: #E2E8F0;
+}
+
+body.dark-booth [class*="border-white/"],
+body.dark-booth [class*="border-slate-200"],
+body.dark-booth [class*="border-slate-300"] {
+  border-color: #1E3658 !important;
+}
+
+/* Contrast text remapping for dark backgrounds */
+body.dark-booth .text-\[\#0B477A\],
+body.dark-booth .text-\[\#003366\] {
+  color: #93C5FD !important;
+}
+
+body.dark-booth .text-slate-900,
+body.dark-booth .text-slate-800 {
   color: #F8FAFC !important;
 }
 
-body.dark-booth p,
-body.dark-booth span {
+body.dark-booth .text-\[\#615D73\],
+body.dark-booth .text-slate-700,
+body.dark-booth .text-slate-600 {
   color: #94A3B8 !important;
 }
 
+body.dark-booth .text-slate-500,
+body.dark-booth .text-slate-400 {
+  color: #8DA2C0 !important;
+}
+
+/* Table body & rows */
+body.dark-booth tbody {
+  background-color: #0E1A2C !important;
+}
+
+body.dark-booth tr.hover\:bg-slate-50:hover,
+body.dark-booth tr.hover\:bg-white:hover {
+  background-color: #13243C !important;
+}
+
+body.dark-booth .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+body.dark-booth .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1E3658 !important;
+}
+
+/* Inputs, selects, and textareas */
 body.dark-booth input,
 body.dark-booth select,
 body.dark-booth textarea {
-  background-color: #0F172A !important;
-  border-color: #334155 !important;
+  background-color: #0A1422 !important;
+  border-color: #1E385D !important;
   color: #F8FAFC !important;
+}
+
+body.dark-booth input::placeholder,
+body.dark-booth textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Status Badges & Interpol Alerts - Vibrant Glow in Dark Booth */
+body.dark-booth .bg-emerald-50,
+body.dark-booth .bg-emerald-100,
+body.dark-booth .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+body.dark-booth .text-emerald-700,
+body.dark-booth .text-emerald-800,
+body.dark-booth .text-emerald-900 {
+  color: #34D399 !important;
+}
+
+body.dark-booth .bg-amber-50,
+body.dark-booth .bg-amber-100,
+body.dark-booth .bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+body.dark-booth .text-amber-700,
+body.dark-booth .text-amber-800,
+body.dark-booth .text-amber-900 {
+  color: #FBBF24 !important;
+}
+
+body.dark-booth .bg-rose-50,
+body.dark-booth .bg-rose-100,
+body.dark-booth .bg-\[\#D30B0D\]\/10 {
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+body.dark-booth .text-\[\#D30B0D\],
+body.dark-booth .text-rose-700,
+body.dark-booth .text-rose-800,
+body.dark-booth .text-rose-900 {
+  color: #F87171 !important;
+}
+
+/* Modals */
+body.dark-booth .fixed.inset-0 .bg-white {
+  background-color: #0E1A2C !important;
+  border-color: #1E385D !important;
+  color: #F1F5F9;
 }
