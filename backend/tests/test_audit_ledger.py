@@ -59,6 +59,15 @@ class TestAuditLedger(unittest.TestCase):
         # Integrity verification must detect the alteration and fail
         self.assertFalse(self.ledger.verify_integrity())
 
+    def test_case_cryptographic_certificate(self):
+        self.ledger.record_event("CASE_CERT_1", "SCREENING_COMPLETED", "OFF_007", "LOW", 12.0, "Verified")
+        cert = self.ledger.generate_case_certificate("CASE_CERT_1")
+        self.assertIsNotNone(cert)
+        self.assertEqual(cert["case_id"], "CASE_CERT_1")
+        self.assertTrue(cert["cryptographic_proof"]["is_cryptographically_valid"])
+        self.assertIn("Section 65B", cert["statutory_compliance"]["evidence_act"])
+
+
 
 if __name__ == "__main__":
     unittest.main()

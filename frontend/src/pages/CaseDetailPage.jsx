@@ -460,12 +460,11 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
                     alt="Document Scan" 
                     className="w-full h-full object-contain"
                   />
-                  <div className="absolute inset-4 rounded-xl pointer-events-none border border-white/20 overflow-hidden">
-                    <div className="scan-line" />
-                  </div>
-                  <div className="absolute bottom-3 left-3 bg-[#0B477A]/85 backdrop-blur-md rounded-lg px-3 py-1 text-xs text-white font-mono border border-white/20 shadow-xs">
+                  <div className="absolute inset-4 rounded-xl pointer-events-none border border-blue-500/30 reticle-bracket" />
+                  <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-md rounded-md px-2.5 py-1 text-xs text-white font-mono border border-slate-700 shadow-xs">
                     RAW SCAN · OPTICAL QUALITY: {optQuality}%
                   </div>
+
                 </>
               )}
 

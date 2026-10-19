@@ -602,6 +602,19 @@ def get_case_audit_trail(case_id: str):
     }
 
 
+@app.get("/api/v1/audit/cases/{case_id}/certificate")
+def get_case_audit_certificate(case_id: str):
+    """
+    Returns an exportable, digitally verifiable Section 65B Indian Evidence Act compliant
+    cryptographic proof certificate for a completed screening case.
+    """
+    cert = audit_ledger.generate_case_certificate(case_id)
+    if not cert:
+        raise HTTPException(status_code=404, detail=f"No cryptographic ledger records found for Case '{case_id}'.")
+    return cert
+
+
+
 # =============================================================================
 # Showcase Presets (for 1-Click Evaluation / SIH 2026 Presentation)
 # =============================================================================

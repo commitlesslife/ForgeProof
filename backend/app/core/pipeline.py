@@ -14,6 +14,7 @@ Coordinates end-to-end identity screening:
 import os
 import shutil
 import uuid
+import concurrent.futures
 from typing import Dict, Any, Optional, List
 
 from app.config import (
@@ -71,52 +72,81 @@ def process_screening_pipeline(
     # Step 2: Quality Gate
     quality_res = evaluate_image_quality(doc_path)
 
-    import gc
-    gc.collect()
+    doc_type_clean = (doc_type or "PASSPORT").upper()
 
-    # Step 3: Forensic Tampering Analysis (Module 3 - ELA, boundary edge variance, FFT noise, stamp circularity)
-    tampering_res = run_comprehensive_forensics(doc_path, str(FORENSICS_DIR), case_id, doc_type=doc_type)
-    gc.collect()
-
-    # Step 4: Facial Biometric Verification (Module 4 - 128-d embeddings, distance, anti-spoofing)
-    face_res = None
-    if live_path and os.path.exists(live_path):
+    # Step 3, 4, 5: Concurrent Multi-Engine Core (Parallel Dispatch via ThreadPoolExecutor)
+    def _run_forensics_safe() -> Dict[str, Any]:
         try:
-            face_res = verify_faces(doc_path, live_path, str(FACES_DIR), case_id)
+            return run_comprehensive_forensics(doc_path, str(FORENSICS_DIR), case_id, doc_type=doc_type)
         except Exception as e:
-            print(f"Face verification memory constraint / error: {e}")
-            face_res = {
+            print(f"Forensics engine error fallback: {e}")
+            return {
+                "tampering_score": 15.0,
+                "is_tampered": False,
+                "classical_score": 15.0,
+                "neural_score": 15.0,
+                "evidence_list": [{
+                    "type": "FORENSIC_DEGRADED",
+                    "severity": "WARNING",
+                    "title": "Forensic Inspection Fallback",
+                    "description": f"Deep forensics encountered edge constraint: {e}"
+                }],
+                "ela_heatmap_url": None,
+                "boundary_overlay_url": None,
+                "neural_heatmap_url": None
+            }
+
+    def _run_face_safe() -> Dict[str, Any]:
+        if live_path and os.path.exists(live_path):
+            try:
+                return verify_faces(doc_path, live_path, str(FACES_DIR), case_id)
+            except Exception as e:
+                print(f"Face verification memory constraint / error: {e}")
+                return {
+                    "success": False,
+                    "match_score": 0.0,
+                    "euclidean_distance": None,
+                    "is_match": None,
+                    "face_risk": 20.0,
+                    "threshold": 0.38,
+                    "liveness": {"is_live": True, "attack_type": "Evaluated with lightweight fallback"},
+                    "doc_face_crop_url": None,
+                    "live_face_crop_url": None,
+                    "error": f"Biometric analysis fallback: {str(e)}"
+                }
+        else:
+            return {
                 "success": False,
                 "match_score": 0.0,
                 "euclidean_distance": None,
                 "is_match": None,
-                "face_risk": 20.0,
+                "face_risk": 0.0,
                 "threshold": 0.38,
-                "liveness": {"is_live": True, "attack_type": "Evaluated with lightweight fallback"},
+                "liveness": {"is_live": True, "attack_type": "No live camera feed provided"},
                 "doc_face_crop_url": None,
                 "live_face_crop_url": None,
-                "error": f"Biometric analysis fallback: {str(e)}"
+                "error": "No live capture image presented for biometric comparison"
             }
-    else:
-        face_res = {
-            "success": False,
-            "match_score": 0.0,
-            "euclidean_distance": None,
-            "is_match": None,
-            "face_risk": 0.0,
-            "threshold": 0.38,
-            "liveness": {"is_live": True, "attack_type": "No live camera feed provided"},
-            "doc_face_crop_url": None,
-            "live_face_crop_url": None,
-            "error": "No live capture image presented for biometric comparison"
-        }
-    gc.collect()
 
-    # Step 5: Dynamic OCR Field Extraction (Module 1 - EasyOCR)
-    doc_type_clean = (doc_type or "PASSPORT").upper()
-    extracted_viz = extract_document_fields_real(doc_path, doc_type_clean)
+    def _run_ocr_safe() -> Dict[str, Any]:
+        try:
+            return extract_document_fields_real(doc_path, doc_type_clean)
+        except Exception as e:
+            print(f"OCR extraction exception fallback: {e}")
+            return {}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        fut_tamper = executor.submit(_run_forensics_safe)
+        fut_face = executor.submit(_run_face_safe)
+        fut_ocr = executor.submit(_run_ocr_safe)
+
+        tampering_res = fut_tamper.result()
+        face_res = fut_face.result()
+        extracted_viz = fut_ocr.result()
+
     if custom_viz:
         extracted_viz.update(custom_viz)
+
 
     # Step 6: Mathematical Checksum & Structural Validation (Module 2)
     validation_res = {}
@@ -205,9 +235,10 @@ def process_screening_pipeline(
 
     # Step 6b: 2D Barcode & QR Code Cross-Verification (Front & Backside)
     viz_fields_data = validation_res.get("viz_fields", {})
-    qr_res = extract_and_verify_qr(doc_path, doc_back_path, viz_fields_data)
+    qr_res = extract_and_verify_qr(doc_path, doc_back_path, viz_fields_data, output_photo_dir=str(FACES_DIR), case_id=case_id)
     validation_res["qr_code"] = qr_res
     validation_res["qr_verification"] = qr_res
+
 
     # Step 6c: Simulated Interpol Red Notice & Law Enforcement Watchlist Screening
     doc_num_val = viz_fields_data.get("doc_number")

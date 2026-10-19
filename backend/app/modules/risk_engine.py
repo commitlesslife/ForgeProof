@@ -156,22 +156,37 @@ def compute_composite_risk(
         })
 
     # -------------------------------------------------------------------------
-    # 5. Composite Weighted Score & Anomaly Floor
+    # 5. Dynamic Normalized Composite Score & Anomaly Floor
     # -------------------------------------------------------------------------
-    w = RISK_WEIGHTS
-    composite_score = (
-        w["validation"] * val_risk +
-        w["tampering"] * tamp_risk +
-        w["face"] * face_risk +
-        w["metadata"] * meta_risk
-    )
+    has_live_face = bool(face_res and (face_res.get("success") or face_res.get("face_risk", 0.0) > 15.0))
+    w = dict(RISK_WEIGHTS)
+
+    if not has_live_face:
+        # Dynamic normalization: re-distribute face weight across active validation, tampering, and metadata
+        active_sum = w["validation"] + w["tampering"] + w["metadata"]
+        w_val = w["validation"] / active_sum
+        w_tamp = w["tampering"] / active_sum
+        w_meta = w["metadata"] / active_sum
+        composite_score = (w_val * val_risk + w_tamp * tamp_risk + w_meta * meta_risk)
+    else:
+        composite_score = (
+            w["validation"] * val_risk +
+            w["tampering"] * tamp_risk +
+            w["face"] * face_risk +
+            w["metadata"] * meta_risk
+        )
 
     # Critical Anomaly Floor: If any core pillar exhibits critical failure, elevate score
-    max_pillar = max(val_risk, tamp_risk, face_risk)
+    max_pillar = max(val_risk, tamp_risk, face_risk if has_live_face else 0.0)
     if max_pillar >= 75.0 and composite_score < 72.0:
         composite_score = max(composite_score, 75.0)
 
+    # QR Code Contradiction Floor (Physical vs Digital mismatch)
+    if qr_data and qr_data.get("tampering_detected"):
+        composite_score = max(composite_score, 82.0)
+
     composite_score = round(min(100.0, max(0.0, composite_score)), 1)
+
 
     all_evidence = val_evidence + tamp_evidence + face_evidence + meta_evidence
 

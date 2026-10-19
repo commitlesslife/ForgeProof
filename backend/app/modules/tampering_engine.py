@@ -347,8 +347,57 @@ def inspect_metadata_forensics(image_path: str) -> Dict[str, Any]:
 
 
 # =============================================================================
+# 6. Copy-Move Forgery Detection (CMFD) - ORB Keypoint Spatial Clustering
+# =============================================================================
+def detect_copy_move_forgery(image_path: str) -> Dict[str, Any]:
+    """
+    Detects cloned official stamps, duplicated numerical digits, or forged signatures
+    within the same document using ORB (Oriented FAST and Rotated BRIEF) feature clustering.
+    """
+    try:
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            return {"cmfd_detected": False, "cloned_pairs_count": 0, "score": 0.0, "detail": "Image unreadable for CMFD"}
+
+        orb = cv2.ORB_create(nfeatures=1000)
+        kp, des = orb.detectAndCompute(img, None)
+        if des is None or len(des) < 20:
+            return {"cmfd_detected": False, "cloned_pairs_count": 0, "score": 0.0, "detail": "Insufficient keypoints for CMFD"}
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+        matches = bf.knnMatch(des, des, k=3)
+
+        cloned_pairs = []
+        min_spatial_dist = 40.0   # Must be separated on the document
+        max_hamming_dist = 35     # Highly similar feature vector
+
+        for m in matches:
+            if len(m) >= 2:
+                target = m[1]
+                if target.distance < max_hamming_dist:
+                    pt1 = np.array(kp[target.queryIdx].pt)
+                    pt2 = np.array(kp[target.trainIdx].pt)
+                    dist = float(np.linalg.norm(pt1 - pt2))
+                    if dist > min_spatial_dist:
+                        cloned_pairs.append((pt1, pt2, dist))
+
+        cmfd_detected = len(cloned_pairs) >= 12
+        cmfd_score = float(np.clip(len(cloned_pairs) * 4.5, 0.0, 95.0))
+
+        return {
+            "cmfd_detected": cmfd_detected,
+            "cloned_pairs_count": len(cloned_pairs),
+            "score": round(cmfd_score, 1),
+            "detail": f"{len(cloned_pairs)} cloned feature clusters detected (possible copy-move forgery)" if cmfd_detected else "No duplicated image patches detected"
+        }
+    except Exception as e:
+        return {"cmfd_detected": False, "cloned_pairs_count": 0, "score": 0.0, "detail": f"CMFD error: {e}"}
+
+
+# =============================================================================
 # Master Forensic Execution
 # =============================================================================
+
 def run_comprehensive_forensics(
     image_path: str,
     output_dir: str,
@@ -381,14 +430,16 @@ def run_comprehensive_forensics(
         }
         
     meta_res = inspect_metadata_forensics(image_path)
+    cmfd_res = detect_copy_move_forgery(image_path)
 
     # Weighted aggregate score for Pipeline A (Classical Signal Forensics)
-    weights = [0.35, 0.35, 0.15, 0.15]
+    weights = [0.30, 0.30, 0.15, 0.10, 0.15]
     scores = [
         ela_res.get("tampering_score", 0.0),
         boundary_res.get("boundary_score", 0.0),
         noise_res.get("noise_score", 0.0),
         stamp_res.get("stamp_score", 0.0),
+        cmfd_res.get("score", 0.0),
     ]
 
     classical_score = sum(w * s for w, s in zip(weights, scores))
@@ -403,6 +454,15 @@ def run_comprehensive_forensics(
 
     # Compile forensic evidence items
     evidence: List[Dict[str, str]] = []
+
+    if cmfd_res.get("cmfd_detected"):
+        evidence.append({
+            "type": "COPY_MOVE_FORGERY",
+            "severity": "CRITICAL",
+            "title": "Copy-Move Cloned Features Detected",
+            "description": f"ORB spatial matching detected {cmfd_res.get('cloned_pairs_count')} duplicated feature clusters across separated document regions (cloned stamp, signature, or altered digits)."
+        })
+
 
     if ela_res.get("anomaly_detected"):
         evidence.append({
@@ -470,6 +530,7 @@ def run_comprehensive_forensics(
         "noise": noise_res,
         "stamp": stamp_res,
         "metadata": meta_res,
+        "cmfd": cmfd_res,
         "neural": neural_res,
         "evidence_list": evidence,
         "ela_heatmap_url": f"/static/forensics/{os.path.basename(ela_path)}",
