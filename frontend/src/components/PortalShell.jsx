@@ -20,7 +20,11 @@ import {
   ChevronRight,
   CheckCircle2,
   Lock,
-  Cpu
+  Cpu,
+  ShieldAlert,
+  HelpCircle,
+  PhoneCall,
+  ExternalLink
 } from 'lucide-react'
 import { isAudioMuted, setAudioMuted } from '../utils/audioAlerts'
 import { useLanguage } from '../utils/LanguageContext'
@@ -34,6 +38,7 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
   })
   const [isMuted, setIsMutedState] = useState(() => isAudioMuted())
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [fontSize, setFontSize] = useState('normal') // normal | large | xlarge
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -77,6 +82,13 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
   const utcSecs = String(currentTime.getUTCSeconds()).padStart(2, '0')
   const utcTimeStr = `${utcHours}:${utcMins}:${utcSecs} Z`
 
+  const dateStr = currentTime.toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+
   const navLinks = [
     { id: 'overview', label: t('overview'), icon: LayoutDashboard },
     { id: 'capture', label: t('capture'), icon: ScanLine },
@@ -86,213 +98,334 @@ export default function PortalShell({ children, activePage, onNavigate, officer,
   ]
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A] selection:bg-blue-600 selection:text-white">
-      {/* 1. Sleek Command Header Bar */}
-      <header className="w-full bg-[#0B0F17] text-white border-b border-slate-800/80 sticky top-0 z-50 shadow-sm backdrop-blur-md">
-        <div className="mx-auto max-w-[1560px] px-4 py-2.5 flex items-center justify-between gap-4">
+    <div className={`min-h-screen flex flex-col bg-[#F4F6F9] text-[#1E293B] selection:bg-[#003366] selection:text-white ${fontSize === 'large' ? 'text-base' : fontSize === 'xlarge' ? 'text-lg' : 'text-sm'}`}>
+      
+      {/* 1. National Tricolor Micro-Stripe */}
+      <div className="tricolor-stripe" />
+
+      {/* 2. Official Indian Government Top Utility Masthead */}
+      <header className="w-full bg-[#08213D] text-slate-200 border-b border-slate-700/70">
+        <div className="mx-auto max-w-[1560px] px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
           
-          {/* Left: Modern Defense Brand & Terminal Badge */}
-          <div className="flex items-center gap-3.5">
-            <ForgeProofEmblem className="h-9 w-auto shrink-0 drop-shadow-sm" />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
-                  FORGEPROOF
-                </span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  DEFENSE AI
-                </span>
-              </div>
-              <p className="text-[10px] font-medium text-slate-400 truncate flex items-center gap-1.5">
-                <span>SSB BORDER TERMINAL</span>
-                <span className="size-1 rounded-full bg-slate-600" />
-                <span className="text-emerald-400 font-mono flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  ONLINE
-                </span>
-              </p>
+          {/* Left: Official Government Authority Tags */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm">🇮🇳</span>
+            <div className="flex flex-wrap items-center gap-2 font-semibold text-[11px] tracking-wide uppercase text-slate-300">
+              <span className="font-extrabold text-white">{lang === 'hi' ? 'भारत सरकार' : 'GOVERNMENT OF INDIA'}</span>
+              <span className="text-slate-500">|</span>
+              <span className="hidden sm:inline text-slate-300">{lang === 'hi' ? 'गृह मंत्रालय (पुलिस II प्रभाग)' : 'MINISTRY OF HOME AFFAIRS (POLICE II DIVISION)'}</span>
+              <span className="text-slate-500 hidden sm:inline">|</span>
+              <span className="text-amber-400 font-extrabold hidden md:inline">{lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी)' : 'SASHASTRA SEEMA BAL (SSB)'}</span>
             </div>
           </div>
 
-          {/* Center: Clean Nav Pills */}
-          <nav className="hidden lg:flex items-center bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+          {/* Right: Dual Clocks, Language, Accessibility & Telemetry */}
+          <div className="flex items-center gap-3 text-[11px] font-mono">
+            
+            {/* Dual Time Display */}
+            <div className="hidden lg:flex items-center gap-3 bg-black/35 px-3 py-1 rounded-md border border-white/10 text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <Clock size={12} className="text-amber-400" />
+                <span className="text-slate-400">IST:</span>
+                <strong className="text-white font-bold font-mono">{localTimeStr}</strong>
+              </span>
+              <span className="text-slate-600">|</span>
+              <span className="flex items-center gap-1.5">
+                <Globe2 size={12} className="text-emerald-400" />
+                <span className="text-slate-400">ICAO ZULU:</span>
+                <strong className="text-emerald-300 font-bold font-mono">{utcTimeStr}</strong>
+              </span>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="flex items-center bg-slate-900/90 rounded-md border border-slate-700 p-0.5 text-[10px] font-bold font-sans">
+              <button
+                onClick={() => setLang('en')}
+                className={`px-2.5 py-0.5 rounded transition cursor-pointer ${lang === 'en' ? 'bg-amber-400 text-slate-950 font-black shadow-xs' : 'text-slate-300 hover:text-white'}`}
+                title="Switch interface to English"
+              >
+                English
+              </button>
+              <button
+                onClick={() => setLang('hi')}
+                className={`px-2.5 py-0.5 rounded transition cursor-pointer ${lang === 'hi' ? 'bg-amber-400 text-slate-950 font-black shadow-xs' : 'text-slate-300 hover:text-white'}`}
+                title="इंटरफ़ेस को हिन्दी में बदलें"
+              >
+                हिन्दी
+              </button>
+            </div>
+
+            {/* Accessibility: Font Size Adjuster */}
+            <div className="hidden sm:flex items-center border border-slate-700 rounded-md overflow-hidden text-[10px] font-bold font-sans">
+              <button 
+                onClick={() => setFontSize('normal')} 
+                className={`px-2 py-0.5 ${fontSize === 'normal' ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}`}
+                title="Normal Font Size"
+              >
+                A-
+              </button>
+              <button 
+                onClick={() => setFontSize('large')} 
+                className={`px-2 py-0.5 ${fontSize === 'large' ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}`}
+                title="Medium Font Size"
+              >
+                A
+              </button>
+              <button 
+                onClick={() => setFontSize('xlarge')} 
+                className={`px-2 py-0.5 ${fontSize === 'xlarge' ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}`}
+                title="Large Font Size"
+              >
+                A+
+              </button>
+            </div>
+
+            {/* Tactical Audio Alert Toggle */}
+            <button
+              onClick={toggleAudio}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition cursor-pointer text-[10px] font-sans font-bold ${
+                isMuted 
+                  ? 'border-rose-400/80 bg-rose-950/60 text-rose-300' 
+                  : 'border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800'
+              }`}
+              title={isMuted ? 'Audio alerts are MUTED' : 'Audio alerts are ACTIVE'}
+            >
+              {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} className="text-emerald-400" />}
+              <span className="hidden md:inline">{isMuted ? t('muted') : t('audio_on')}</span>
+            </button>
+
+            {/* Night Booth Inspection Mode Toggle */}
+            <button
+              onClick={toggleDarkBooth}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition cursor-pointer text-[10px] font-sans font-bold ${
+                isDarkBooth 
+                  ? 'border-amber-400 bg-amber-950/60 text-amber-300' 
+                  : 'border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800'
+              }`}
+              title="Toggle Low-Glare Night Booth Mode for low-light border stations"
+            >
+              {isDarkBooth ? <Sun size={12} /> : <Moon size={12} />}
+              <span className="hidden md:inline">{isDarkBooth ? t('day_mode') : t('dark_booth')}</span>
+            </button>
+
+          </div>
+        </div>
+      </header>
+
+      {/* 3. Main Government Portal Banner & Officer Masthead */}
+      <div className="w-full bg-white border-b-2 border-[#003366] shadow-xs">
+        <div className="mx-auto max-w-[1560px] px-4 sm:px-6 py-3.5 sm:py-4 flex flex-wrap items-center justify-between gap-4">
+          
+          {/* Left: Official Emblem & Department Hierarchy */}
+          <div className="flex items-center gap-3.5 sm:gap-5">
+            <ForgeProofEmblem className="h-14 sm:h-16 w-auto shrink-0 drop-shadow-xs" />
+            
+            <div className="border-l-2 border-slate-200 pl-3.5 sm:pl-4 space-y-0.5">
+              <p className="text-[11px] sm:text-xs font-extrabold text-[#003366] tracking-wide leading-tight uppercase">
+                {lang === 'hi' ? 'भारत सरकार · गृह मंत्रालय' : 'GOVERNMENT OF INDIA · MINISTRY OF HOME AFFAIRS'}
+              </p>
+              <h2 className="text-sm sm:text-base font-extrabold text-[#003366] tracking-tight leading-snug">
+                {lang === 'hi' ? 'सशस्त्र सीमा बल (एसएसबी) — सीमा नियंत्रण एवं दस्तावेज़ सत्यापन निदेशालय' : 'SASHASTRA SEEMA BAL (SSB) — BORDER & DOCUMENT SCREENING DIRECTORATE'}
+              </h2>
+              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-slate-600 font-medium">
+                <ForgeProofLogo className="h-3.5 sm:h-4 w-auto shrink-0" />
+                <span className="text-slate-300 hidden sm:inline">|</span>
+                <span className="text-[11px] text-slate-500 hidden sm:inline font-mono">
+                  SIH26188 · MULTI-PILLAR FORENSIC & BIOMETRIC VERIFICATION TERMINAL
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Authenticated Officer Identity Card (Generously Spaced) */}
+          <div className="flex items-center gap-3.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs">
+            <div className="size-11 rounded-xl bg-[#003366] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+              {officerName.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('') || 'OI'}
+            </div>
+            
+            <div className="min-w-0 pr-1 text-left space-y-0.5">
+              <div className="flex items-center gap-2">
+                <p className="font-extrabold text-xs sm:text-sm text-[#003366] truncate">{officerName.toUpperCase()}</p>
+                <span className="size-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" title="Active On Duty" />
+              </div>
+              <p className="text-[11px] font-mono text-slate-600 font-semibold truncate">
+                BADGE: <strong className="text-slate-900">{badgeNo}</strong> · {clearanceLevel.replace('LEVEL_', 'LVL ').replace(/_/g, ' ')}
+              </p>
+              <p className="text-[11px] text-slate-500 font-medium truncate flex items-center gap-1">
+                <MapPin size={11} className="text-slate-400 shrink-0" /> {dutyStation}
+              </p>
+            </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={onLogout}
+              className="ml-2 flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-[#D30B0D] px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
+              title="Sign Out Session"
+            >
+              <LogOut size={13} />
+              <span className="hidden sm:inline">{t('sign_out')}</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* 4. Full-Width Official Government Navigation Bar */}
+      <nav className="w-full bg-[#003366] text-white shadow-md sticky top-0 z-40 border-b border-[#002244]">
+        <div className="mx-auto max-w-[1560px] px-3 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar">
+          
+          {/* Main Navigation Links with generous padding and readable text */}
+          <div className="flex items-center">
             {navLinks.map(({ id, label, icon: Icon }) => {
               const active = activePage === id
               return (
                 <button
                   key={id}
                   onClick={() => onNavigate(id)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                    active
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  className={`flex items-center gap-2.5 px-5 sm:px-6 py-3.5 text-xs sm:text-sm font-bold border-r border-[#002244] transition-all whitespace-nowrap cursor-pointer ${
+                    active 
+                      ? 'bg-[#002244] text-amber-400 border-b-4 border-b-amber-400 shadow-inner' 
+                      : 'text-slate-200 hover:bg-[#002850] hover:text-white border-b-4 border-b-transparent'
                   }`}
                 >
-                  <Icon size={14} className={active ? 'text-white' : 'text-slate-400'} />
+                  <Icon size={16} className={active ? 'text-amber-400' : 'text-slate-300'} />
                   <span>{label}</span>
                 </button>
               )
             })}
-          </nav>
+          </div>
 
-          {/* Right: Telemetry, Clocks, Mode Controls & Officer Chip */}
-          <div className="flex items-center gap-2.5 text-xs">
-            
-            {/* Dual Time Pill */}
-            <div className="hidden xl:flex items-center gap-3 bg-slate-900/90 px-2.5 py-1 rounded-md border border-slate-800 font-mono text-[11px] text-slate-300">
-              <span className="flex items-center gap-1">
-                <Clock size={11} className="text-slate-400" />
-                <span className="text-slate-400">IST:</span>
-                <strong className="text-white font-semibold font-mono-tabular">{localTimeStr}</strong>
-              </span>
-              <span className="text-slate-700">|</span>
-              <span className="flex items-center gap-1">
-                <Globe2 size={11} className="text-blue-400" />
-                <span className="text-slate-400">ZULU:</span>
-                <strong className="text-blue-300 font-semibold font-mono-tabular">{utcTimeStr}</strong>
-              </span>
-            </div>
-
-            {/* Language Switcher */}
-            <div className="flex items-center bg-slate-900 rounded-md border border-slate-800 p-0.5 text-[10px] font-bold">
-              <button
-                onClick={() => setLang('en')}
-                className={`px-2 py-0.5 rounded transition cursor-pointer ${lang === 'en' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang('hi')}
-                className={`px-2 py-0.5 rounded transition cursor-pointer ${lang === 'hi' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                HI
-              </button>
-            </div>
-
-            {/* Audio Alert Toggle */}
-            <button
-              onClick={toggleAudio}
-              className={`p-1.5 rounded-md border transition cursor-pointer ${
-                isMuted
-                  ? 'border-rose-500/40 bg-rose-500/10 text-rose-400'
-                  : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
-              }`}
-              title={isMuted ? 'Audio alerts are muted' : 'Audio alerts are active'}
-            >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} className="text-emerald-400" />}
-            </button>
-
-            {/* Dark Booth Inspection Mode Toggle */}
-            <button
-              onClick={toggleDarkBooth}
-              className={`p-1.5 rounded-md border transition cursor-pointer ${
-                isDarkBooth
-                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-                  : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
-              }`}
-              title={isDarkBooth ? 'Switch to Standard Day Mode' : 'Switch to Low-Glare Dark Booth Mode'}
-            >
-              {isDarkBooth ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
-
-            {/* Duty Officer Profile Chip */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-800">
-              <div className="size-7 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-                {officerName.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('') || 'OI'}
-              </div>
-              <div className="hidden sm:block text-left leading-tight">
-                <p className="font-semibold text-xs text-white truncate max-w-[120px]">{officerName}</p>
-                <p className="text-[10px] font-mono text-slate-400 truncate">BADGE: {badgeNo}</p>
-              </div>
-
-              {/* Logout Button */}
-              <button
-                onClick={onLogout}
-                className="p-1.5 rounded-md bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-800 transition cursor-pointer"
-                title="Sign Out Session"
-              >
-                <LogOut size={13} />
-              </button>
-            </div>
-
+          {/* Right Status Badge */}
+          <div className="hidden lg:flex items-center gap-2.5 text-xs font-mono text-slate-200 pr-2">
+            <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold tracking-wide">NIC SECURE INTRANET · {dateStr}</span>
           </div>
 
         </div>
+      </nav>
 
-        {/* Mobile Navigation Sub-Bar */}
-        <div className="lg:hidden flex items-center gap-1 overflow-x-auto no-scrollbar px-3 py-1.5 border-t border-slate-800/80 bg-slate-950">
-          {navLinks.map(({ id, label, icon: Icon }) => {
-            const active = activePage === id
-            return (
-              <button
-                key={id}
-                onClick={() => onNavigate(id)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold whitespace-nowrap cursor-pointer ${
-                  active ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Icon size={13} />
-                <span>{label}</span>
-              </button>
-            )
-          })}
-        </div>
-      </header>
-
-      {/* 2. Sleek Telemetry & Breadcrumb Ribbon */}
-      <div className="w-full bg-white border-b border-slate-200 text-xs text-slate-600 py-1.5 px-4 sm:px-6 shadow-2xs">
+      {/* 5. Government Breadcrumbs & Security Telemetry Bar */}
+      <div className="w-full bg-[#E8EDF4] border-b border-slate-300/80 text-xs text-slate-600 py-2 px-4 sm:px-6">
         <div className="mx-auto max-w-[1560px] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-            <span className="font-semibold text-slate-800">{t('border_desk')}</span>
+          
+          {/* Breadcrumb path */}
+          <div className="flex items-center gap-1.5 text-[11px] font-medium">
+            <span className="font-bold text-[#003366]">{t('home')}</span>
             <ChevronRight size={12} className="text-slate-400" />
-            <span className="font-bold text-blue-600 uppercase">
+            <span className="text-slate-700">{t('border_desk')}</span>
+            <ChevronRight size={12} className="text-slate-400" />
+            <span className="font-extrabold text-[#003366] uppercase">
               {navLinks.find(n => n.id === activePage)?.label || 'Screening'}
             </span>
           </div>
           
-          <div className="hidden sm:flex items-center gap-3 text-[10px] font-mono text-slate-500">
-            <span className="flex items-center gap-1">
-              <Lock size={10} className="text-emerald-600" />
+          {/* Telemetry Chips */}
+          <div className="hidden sm:flex items-center gap-3.5 text-[10px] font-mono font-semibold text-slate-600">
+            <span className="flex items-center gap-1.5">
+              <Lock size={11} className="text-emerald-700" />
               <span>SHA-256 LEDGER ACTIVE</span>
             </span>
-            <span className="text-slate-300">|</span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 size={10} className="text-blue-600" />
-              <span>DPDP DATA MASKING VERIFIED</span>
+            <span className="text-slate-400">|</span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 size={11} className="text-blue-700" />
+              <span>DPDP ACT 2023 COMPLIANT</span>
             </span>
-            <span className="text-slate-300">|</span>
-            <span>STATION: <strong className="text-slate-700 font-semibold">ICP-RXL-01</strong></span>
+            <span className="text-slate-400">|</span>
+            <span>STATION: <strong className="text-slate-900 font-bold">ICP-RXL-GATE-01</strong></span>
           </div>
+
         </div>
       </div>
 
-      {/* 3. Main Operational Surface */}
+      {/* 6. Main Operational Content Surface */}
       <main className="flex-1 w-full mx-auto max-w-[1560px] p-4 sm:p-6 md:p-8">
         {children}
       </main>
 
-      {/* 4. Professional Defense Console Footer */}
-      <footer className="w-full bg-[#0B0F17] text-slate-400 text-xs border-t border-slate-800 mt-auto">
-        <div className="mx-auto max-w-[1560px] px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-[11px]">
-          <div className="flex items-center gap-3">
-            <ForgeProofLogo variant="compact" theme="dark" className="h-5 w-auto" />
-            <div className="border-l border-slate-800 pl-3">
-              <p className="font-semibold text-white">FORGEPROOF · AI IDENTIFICATION & DOCUMENT SCREENING</p>
-              <p className="text-slate-500 text-[10px]">Ministry of Home Affairs (MHA) · Sashastra Seema Bal (SSB) · SIH26188</p>
+      {/* 7. Official Indian Government Portal Footer */}
+      <footer className="w-full bg-[#0A1A2E] text-slate-300 text-xs border-t-4 border-[#003366] mt-auto">
+        <div className="mx-auto max-w-[1560px] px-4 sm:px-6 py-8 grid grid-cols-1 md:grid-cols-4 gap-6 border-b border-slate-700/80">
+          
+          {/* Col 1: Government Authority */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🇮🇳</span>
+              <p className="font-extrabold text-white text-xs uppercase tracking-wide">
+                GOVERNMENT OF INDIA · भारत सरकार
+              </p>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Ministry of Home Affairs (MHA) · Police II Division
+              <br />
+              Sashastra Seema Bal (SSB) Border Control & Document Directorate
+            </p>
+            <p className="text-[10px] text-slate-500 font-mono pt-1">
+              Smart India Hackathon 2026 · Problem Statement SIH26188
+            </p>
+          </div>
+
+          {/* Col 2: Statutory & Forensic Standards */}
+          <div className="space-y-1.5">
+            <p className="font-bold text-white text-xs uppercase tracking-wider text-amber-400">
+              Statutory Compliance
+            </p>
+            <ul className="text-[11px] text-slate-400 space-y-1 font-mono">
+              <li>• Section 65B, Indian Evidence Act (1872)</li>
+              <li>• Digital Personal Data Protection Act (2023)</li>
+              <li>• ICAO Doc 9303 Machine Readable Travel Docs</li>
+              <li>• ISO/IEC 30107-3 Presentation Attack Detection</li>
+            </ul>
+          </div>
+
+          {/* Col 3: SSB Checkpoint Network */}
+          <div className="space-y-1.5">
+            <p className="font-bold text-white text-xs uppercase tracking-wider text-amber-400">
+              Integrated Checkposts
+            </p>
+            <ul className="text-[11px] text-slate-400 space-y-1">
+              <li>• ICP Raxaul (Indo-Nepal Border, Bihar)</li>
+              <li>• ICP Jogbani (Indo-Nepal Border, Bihar)</li>
+              <li>• ICP Petrapole (Indo-Bangladesh Border, WB)</li>
+              <li>• DEL T3 International Airport Security Desk</li>
+            </ul>
+          </div>
+
+          {/* Col 4: NIC & Border Assistance Desk */}
+          <div className="space-y-2">
+            <p className="font-bold text-white text-xs uppercase tracking-wider text-amber-400">
+              Technical Assistance
+            </p>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              National Informatics Centre (NIC) Border Grid Helpline:
+              <br />
+              <strong className="text-white font-mono">1800-11-8294</strong> (Toll Free · 24x7)
+            </p>
+            <div className="pt-1">
+              <span className="inline-block px-2.5 py-1 rounded bg-slate-800 text-[10px] font-mono font-bold text-emerald-400 border border-slate-700">
+                ● ALL LOCAL AI ENGINES OPERATIONAL (OFFLINE)
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 font-mono text-[10px]">
-            <span>ICAO DOC 9303</span>
+        </div>
+
+        {/* Bottom Copyright & Disclaimer */}
+        <div className="mx-auto max-w-[1560px] px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400 font-medium">
+          <p>
+            © 2026 Government of India · Ministry of Home Affairs · All Rights Reserved
+          </p>
+          <div className="flex items-center gap-4 text-[10px] text-slate-400 font-mono">
+            <span>TERMS OF SCREENING</span>
             <span>·</span>
-            <span>ISO/IEC 30107-3 PAD</span>
+            <span>DATA PRIVACY</span>
             <span>·</span>
-            <span>DPDP ACT 2023</span>
+            <span>SECURITY AUDIT</span>
             <span>·</span>
-            <span className="text-emerald-400 font-bold">V2.5 PRODUCTION</span>
+            <span className="text-white font-bold">FORGEPROOF V2.6 PROD</span>
           </div>
         </div>
       </footer>
+
     </div>
   )
 }

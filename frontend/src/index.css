@@ -25,6 +25,12 @@
 }
 
 @layer utilities {
+  .tricolor-stripe {
+    height: 3.5px;
+    width: 100%;
+    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+  }
+
   .pb-safe {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
