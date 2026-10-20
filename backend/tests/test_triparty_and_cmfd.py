@@ -74,3 +74,23 @@ class TestTripartyAndCMFD(unittest.TestCase):
             "Photo Substitution" in ev.get("title", "") for ev in risk["evidence_items"]
         )
         self.assertTrue(found_subst_evidence)
+
+    def test_scenario7_preset_execution(self):
+        """Test preset execution for scenario7_photo_substitution."""
+        from app.core.pipeline import run_preset_scenario_pipeline
+        from app.config import SAMPLES_DIR
+
+        doc_sample = os.path.join(str(SAMPLES_DIR), "scenario4_genuine_indian_aadhaar.jpg")
+        live_sample = os.path.join(str(SAMPLES_DIR), "presenter_impersonator_mismatch.jpg")
+
+        if os.path.exists(doc_sample) and os.path.exists(live_sample):
+            result = run_preset_scenario_pipeline(
+                preset_id="scenario7_photo_substitution",
+                doc_path=doc_sample,
+                live_path=live_sample,
+                doc_type="AADHAAR"
+            )
+            self.assertEqual(result["risk_assessment"]["risk_level"], "HIGH")
+            self.assertGreaterEqual(result["risk_assessment"]["composite_score"], 95.0)
+            self.assertTrue(result["face_match"]["triparty"]["photo_substitution_detected"])
+            self.assertFalse(result["face_match"]["triparty"]["doc_vs_qr_match"])

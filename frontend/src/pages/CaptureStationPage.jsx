@@ -88,6 +88,19 @@ const CALIBRATION_PRESETS = [
     faceFile: 'presenter_rohit_matching.jpg',
     summary: 'Document number P9823412 matches active CBI Interpol NCB Red Notice #2026-9041.',
     expected: 'CRITICAL (100%) · DETAIN PASSENGER'
+  },
+  {
+    id: 'deck_photo_substitution',
+    backendPresetId: 'scenario7_photo_substitution',
+    tag: 'TRI-PARTY TAMPER DETECTED',
+    tagColor: 'bg-rose-100 text-rose-800 border-rose-300',
+    title: 'Tampered Aadhaar · Physical Photo Swap',
+    subtitle: 'Altered printed card photo diverging from UIDAI signed QR avatar',
+    docType: 'AADHAAR',
+    docFile: 'scenario4_genuine_indian_aadhaar.jpg',
+    faceFile: 'presenter_impersonator_mismatch.jpg',
+    summary: 'Printed card portrait diverges from digitally signed QR portrait. Tri-party engine detects physical photo substitution with 100% cryptographic certainty.',
+    expected: 'CRITICAL (96%) · PHOTO SUBSTITUTION'
   }
 ]
 

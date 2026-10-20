@@ -566,6 +566,73 @@ def run_preset_scenario_pipeline(
         face_res = face_res or {"success": True, "match_score": 93.0, "is_match": True, "face_risk": 7.0}
         risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
 
+    elif preset_id in ("scenario7_photo_substitution", "deck_photo_substitution"):
+        validation_res = {
+            "indian_id": {
+                "valid": True,
+                "doc_type": "AADHAAR",
+                "doc_number_masked": "XXXX-XXXX-1841",
+                "checksum_algorithm": "UIDAI Verhoeff D5 Checksum",
+                "reason": "Verhoeff check digit valid"
+            },
+            "viz_fields": {
+                "doc_number": "XXXX-XXXX-1841",
+                "full_name": "Rohit Sharma",
+                "dob": "15/08/1994",
+                "issuing_authority": "UIDAI (Unique Identification Authority of India)"
+            },
+            "qr_code": {
+                "detected": True,
+                "qr_location": "Aadhaar Backside",
+                "tampering_detected": False,
+                "signature_status": "VALID_UIDAI_PKI",
+                "detail": "UIDAI 2048-bit RSA signature verified. Encrypted demographics match cardholder record."
+            }
+        }
+        # Copy reference portrait as the QR avatar to static/faces/{case_id}_qr_face.jpg
+        qr_avatar_path = os.path.join(str(FACES_DIR), f"{case_id}_qr_face.jpg")
+        sample_rohit = os.path.join(str(SAMPLES_DIR), "presenter_rohit_matching.jpg")
+        if os.path.exists(sample_rohit):
+            shutil.copyfile(sample_rohit, qr_avatar_path)
+
+        tampering_res.update({
+            "tampering_score": 75.0,
+            "classical_score": 72.0,
+            "neural_score": 78.0,
+            "pipeline": {
+                "classical_score": 72.0,
+                "neural_score": 78.0,
+                "composite_score": 75.0,
+                "model": "ForgeProof SRM-ResNet CNN (PyTorch Edge)",
+                "methodology": "Dual-Pipeline: Signal Processing + Deep Residual Feature Variance"
+            },
+            "is_tampered": True,
+            "evidence_list": [
+                {"type": "PHOTO_SUBSTITUTION", "severity": "CRITICAL", "title": "Physical Photo Substitution Tampering", "description": "Physical card photograph diverges from the cryptographically signed UIDAI Secure QR portrait."}
+            ]
+        })
+        face_res = {
+            "success": True,
+            "match_score": 24.0,
+            "is_match": False,
+            "face_risk": 96.0,
+            "doc_face_crop_url": f"/static/uploads/{os.path.basename(doc_copy_path)}",
+            "live_face_crop_url": f"/static/samples/{os.path.basename(live_path)}" if live_path else None,
+            "triparty": {
+                "has_qr_face": True,
+                "qr_face_url": f"/static/faces/{os.path.basename(qr_avatar_path)}",
+                "doc_vs_qr_match": False,
+                "doc_vs_qr_score": 18.2,
+                "doc_vs_qr_distance": 0.584,
+                "qr_vs_live_match": False,
+                "qr_vs_live_score": 24.0,
+                "qr_vs_live_distance": 0.562,
+                "photo_substitution_detected": True,
+                "detail": "CRITICAL TAMPER ALERT: Document printed portrait does NOT match the digitally signed QR code avatar! Physical photo substitution detected."
+            }
+        }
+        risk_res = compute_composite_risk(validation_res, tampering_res, face_res, {"metadata_risk": 0.0, "flags": []})
+
     else:
         # Fallback to standard screening pipeline
         return process_screening_pipeline(doc_path=doc_path, live_path=live_path, doc_type=doc_type, case_id=case_id)
