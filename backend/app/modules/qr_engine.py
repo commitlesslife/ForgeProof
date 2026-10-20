@@ -140,6 +140,7 @@ def _parse_qr_payload(raw_text: str, output_photo_dir: Optional[str] = None, cas
                     with open(qr_photo_path, "wb") as f_out:
                         f_out.write(photo_bytes)
                     parsed["embedded_photo_path"] = qr_photo_path
+                    parsed["embedded_photo_url"] = f"/static/faces/{os.path.basename(qr_photo_path)}"
 
                 return parsed
         except Exception as e:
@@ -280,6 +281,7 @@ def extract_and_verify_qr(
         "tampering_detected": is_tampered,
         "signature_status": signature_status,
         "embedded_photo_path": parsed.get("embedded_photo_path"),
+        "embedded_photo_url": parsed.get("embedded_photo_url"),
         "parsed_fields": {
             "name": parsed.get("name"),
             "doc_number": parsed.get("doc_number"),

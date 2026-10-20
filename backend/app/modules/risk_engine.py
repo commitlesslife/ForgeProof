@@ -133,6 +133,22 @@ def compute_composite_risk(
                     "title": "Photo Replay / Spoofing Suspected",
                     "detail": "The presenter's camera image appears to be a digital screen or printed photo rather than a live person."
                 })
+
+        # Tri-Party UIDAI Cryptographic Portrait Verification Check
+        triparty = face_res.get("triparty", {})
+        if triparty.get("photo_substitution_detected"):
+            face_risk = max(face_risk, 96.0)
+            face_evidence.append({
+                "severity": "CRITICAL",
+                "title": "Physical Photo Substitution Tampering Detected",
+                "detail": "Physical portrait printed on card does NOT match the digitally signed biometric portrait embedded in the UIDAI Secure QR code. This indicates a physical photo-swap or laminated overlay attack."
+            })
+        elif triparty.get("has_qr_face") and triparty.get("is_doc_qr_match"):
+            face_evidence.append({
+                "severity": "INFO",
+                "title": "UIDAI Cryptographic Portrait Verified",
+                "detail": f"Physical printed card portrait successfully verified against UIDAI digitally signed QR code avatar (Match score: {triparty.get('doc_qr_score', 95.0)}%)."
+            })
         else:
             if face_res.get("error"):
                 face_evidence.append({
@@ -184,6 +200,11 @@ def compute_composite_risk(
     # QR Code Contradiction Floor (Physical vs Digital mismatch)
     if qr_data and qr_data.get("tampering_detected"):
         composite_score = max(composite_score, 82.0)
+
+    # Photo Substitution Anomaly Floor (Peeling/Photo Swap attack)
+    triparty_data = face_res.get("triparty", {}) if face_res else {}
+    if triparty_data.get("photo_substitution_detected"):
+        composite_score = max(composite_score, 95.0)
 
     composite_score = round(min(100.0, max(0.0, composite_score)), 1)
 

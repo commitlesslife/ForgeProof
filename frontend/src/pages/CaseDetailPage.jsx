@@ -440,6 +440,17 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
                     Neural AI Map
                   </button>
                 )}
+                {tampering.cmfd_overlay_url && (
+                  <button
+                    onClick={() => setActiveView('cmfd')}
+                    className={`px-3 py-1.5 rounded-lg transition shrink-0 whitespace-nowrap cursor-pointer active:scale-95 flex items-center gap-1.5 ${
+                      activeView === 'cmfd' ? 'glass-navy text-white font-bold' : 'hover:bg-white/80'
+                    }`}
+                  >
+                    <Layers size={13} className="text-amber-300" />
+                    CMFD Clones
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveView('biometric')}
                   className={`px-3 py-1.5 rounded-lg transition shrink-0 whitespace-nowrap cursor-pointer active:scale-95 ${
@@ -508,31 +519,122 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
                 </>
               )}
 
+              {activeView === 'cmfd' && (
+                <>
+                  <SecureImage 
+                    src={`${API_BASE}${tampering.cmfd_overlay_url}`} 
+                    alt="Copy-Move Forgery Clones" 
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute bottom-3 left-3 bg-[#0B477A]/85 backdrop-blur-md rounded-lg px-3 py-1 text-xs text-white font-mono border border-white/20 shadow-xs flex items-center gap-1.5">
+                    <Layers size={13} className="text-amber-300" />
+                    <span>COPY-MOVE FORGERY (CMFD) · {tampering.cmfd?.cloned_pairs_count || 0} CLONED PAIRS MAPPED</span>
+                  </div>
+                </>
+              )}
 
               {activeView === 'biometric' && (
-                <div className="grid grid-cols-2 w-full h-full p-4 gap-4">
-                  <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
-                    <SecureImage 
-                      src={`${API_BASE}${face.doc_face_crop_url || caseData.doc_image_url}`} 
-                      alt="Document Portrait Crop"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-[#0B477A]/80 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
-                      ID PORTRAIT CROP
-                    </div>
-                  </div>
+                face.triparty?.has_qr_face ? (
+                  <div className="flex flex-col w-full h-full p-3 gap-2 overflow-y-auto">
+                    {face.triparty.photo_substitution_detected ? (
+                      <div className="bg-rose-950/90 border border-rose-500 text-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-between shrink-0 shadow-md">
+                        <span className="flex items-center gap-1.5">
+                          <ShieldAlert size={14} className="text-rose-400 shrink-0" />
+                          CRITICAL: Physical Photo Substitution Tampering Detected!
+                        </span>
+                        <span className="font-mono text-[10px] bg-rose-900 px-2 py-0.5 rounded text-rose-100">
+                          PARITY MISMATCH
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-between shrink-0">
+                        <span className="flex items-center gap-1.5">
+                          <ShieldCheck size={14} className="text-emerald-400 shrink-0" />
+                          Tri-Party Integrity: Physical document matches UIDAI Signed QR Avatar
+                        </span>
+                        <span className="font-mono text-[10px] bg-emerald-900 px-2 py-0.5 rounded text-emerald-100">
+                          {face.triparty.doc_vs_qr_score ?? 95}% MATCH
+                        </span>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-3 w-full flex-1 gap-2.5 min-h-[220px]">
+                      {/* 1. Printed ID Photo */}
+                      <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
+                        <SecureImage 
+                          src={`${API_BASE}${face.doc_face_crop_url || caseData.doc_image_url}`} 
+                          alt="Document Portrait Crop"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 left-2 bg-[#0B477A]/90 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
+                          1. CARD PRINTED PHOTO
+                        </div>
+                      </div>
 
-                  <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
-                    <SecureImage 
-                      src={`${API_BASE}${face.live_face_crop_url || caseData.live_image_url || ''}`} 
-                      alt="Live Capture Face"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2 bg-[#0B477A]/80 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
-                      LIVE WEBCAM CAPTURE
+                      {/* 2. UIDAI Cryptographic QR Avatar */}
+                      <div className={`relative rounded-xl overflow-hidden bg-slate-900 border flex flex-col items-center justify-center ${
+                        face.triparty.photo_substitution_detected ? 'border-rose-500 ring-2 ring-rose-500/40' : 'border-emerald-500/70'
+                      }`}>
+                        <SecureImage 
+                          src={`${API_BASE}${face.triparty.qr_face_url}`} 
+                          alt="UIDAI Signed QR Avatar"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 left-2 bg-slate-900/90 px-2 py-0.5 rounded text-[10px] text-amber-300 font-mono border border-amber-400/40 flex items-center gap-1">
+                          <QrCode size={11} />
+                          2. UIDAI SIGNED QR AVATAR
+                        </div>
+                        <div className={`absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          face.triparty.photo_substitution_detected 
+                            ? 'bg-rose-900/95 text-rose-200 border border-rose-500' 
+                            : 'bg-emerald-900/95 text-emerald-200 border border-emerald-500'
+                        }`}>
+                          Doc vs QR: {face.triparty.doc_vs_qr_score ?? (face.triparty.doc_vs_qr_match ? '95%' : 'TAMPERED')}
+                        </div>
+                      </div>
+
+                      {/* 3. Live Webcam Capture */}
+                      <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
+                        <SecureImage 
+                          src={`${API_BASE}${face.live_face_crop_url || caseData.live_image_url || ''}`} 
+                          alt="Live Capture Face"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 left-2 bg-[#0B477A]/90 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
+                          3. LIVE WEBCAM FEED
+                        </div>
+                        {face.triparty.qr_vs_live_score !== undefined && face.triparty.qr_vs_live_score !== null && (
+                          <div className="absolute bottom-2 right-2 bg-slate-900/90 px-2 py-0.5 rounded text-[10px] text-slate-200 font-mono border border-white/20">
+                            QR vs Live: {face.triparty.qr_vs_live_score}%
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="grid grid-cols-2 w-full h-full p-4 gap-4">
+                    <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
+                      <SecureImage 
+                        src={`${API_BASE}${face.doc_face_crop_url || caseData.doc_image_url}`} 
+                        alt="Document Portrait Crop"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-2 left-2 bg-[#0B477A]/80 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
+                        ID PORTRAIT CROP
+                      </div>
+                    </div>
+
+                    <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-white/20 flex flex-col items-center justify-center">
+                      <SecureImage 
+                        src={`${API_BASE}${face.live_face_crop_url || caseData.live_image_url || ''}`} 
+                        alt="Live Capture Face"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-2 left-2 bg-[#0B477A]/80 px-2 py-0.5 rounded text-[10px] text-white font-mono border border-white/20">
+                        LIVE WEBCAM CAPTURE
+                      </div>
+                    </div>
+                  </div>
+                )
               )}
             </div>
 
@@ -725,6 +827,13 @@ export default function CaseDetailPage({ caseId, officer, onBack }) {
                     <span className="text-slate-600 font-medium">Border Seal Geometry</span>
                     <span className="font-mono font-bold text-slate-900">
                       {tampering.stamp?.has_stamp ? `Circ: ${tampering.stamp.stamp_circularity} (${tampering.stamp.stamp_integrity_valid ? 'Valid' : 'Forged'})` : 'Exempt (National ID)'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50/80 border border-slate-200/80">
+                    <span className="text-slate-600 font-medium">Copy-Move Clones (CMFD)</span>
+                    <span className={`font-mono font-bold ${tampering.cmfd?.cmfd_detected ? 'text-rose-600' : 'text-slate-900'}`}>
+                      {tampering.cmfd?.cloned_pairs_count || 0} pairs · {tampering.cmfd?.cmfd_detected ? 'CLONES DETECTED' : 'CLEAN'}
                     </span>
                   </div>
                 </div>

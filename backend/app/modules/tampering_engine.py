@@ -349,19 +349,27 @@ def inspect_metadata_forensics(image_path: str) -> Dict[str, Any]:
 # =============================================================================
 # 6. Copy-Move Forgery Detection (CMFD) - ORB Keypoint Spatial Clustering
 # =============================================================================
-def detect_copy_move_forgery(image_path: str) -> Dict[str, Any]:
+def detect_copy_move_forgery(
+    image_path: str,
+    output_cmfd_path: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Detects cloned official stamps, duplicated numerical digits, or forged signatures
     within the same document using ORB (Oriented FAST and Rotated BRIEF) feature clustering.
+    Optionally saves a visual forensic overlay mapping the cloned feature pairs.
     """
     try:
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        if img is None:
+        color_img = cv2.imread(image_path)
+        if color_img is None:
             return {"cmfd_detected": False, "cloned_pairs_count": 0, "score": 0.0, "detail": "Image unreadable for CMFD"}
 
-        orb = cv2.ORB_create(nfeatures=1000)
-        kp, des = orb.detectAndCompute(img, None)
+        gray = cv2.cvtColor(color_img, cv2.COLOR_BGR2GRAY)
+        orb = cv2.ORB_create(nfeatures=1200)
+        kp, des = orb.detectAndCompute(gray, None)
         if des is None or len(des) < 20:
+            if output_cmfd_path:
+                os.makedirs(os.path.dirname(output_cmfd_path), exist_ok=True)
+                cv2.imwrite(output_cmfd_path, color_img)
             return {"cmfd_detected": False, "cloned_pairs_count": 0, "score": 0.0, "detail": "Insufficient keypoints for CMFD"}
 
         bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
@@ -384,10 +392,23 @@ def detect_copy_move_forgery(image_path: str) -> Dict[str, Any]:
         cmfd_detected = len(cloned_pairs) >= 12
         cmfd_score = float(np.clip(len(cloned_pairs) * 4.5, 0.0, 95.0))
 
+        # Render visual forensic overlay if requested
+        if output_cmfd_path:
+            os.makedirs(os.path.dirname(output_cmfd_path), exist_ok=True)
+            vis = color_img.copy()
+            for pt1, pt2, _ in cloned_pairs[:80]:
+                p1 = (int(round(pt1[0])), int(round(pt1[1])))
+                p2 = (int(round(pt2[0])), int(round(pt2[1])))
+                cv2.circle(vis, p1, 4, (0, 0, 255), -1)
+                cv2.circle(vis, p2, 4, (0, 255, 255), -1)
+                cv2.line(vis, p1, p2, (0, 215, 255), 1, cv2.LINE_AA)
+            cv2.imwrite(output_cmfd_path, vis)
+
         return {
             "cmfd_detected": cmfd_detected,
             "cloned_pairs_count": len(cloned_pairs),
             "score": round(cmfd_score, 1),
+            "overlay_path": output_cmfd_path if output_cmfd_path else None,
             "detail": f"{len(cloned_pairs)} cloned feature clusters detected (possible copy-move forgery)" if cmfd_detected else "No duplicated image patches detected"
         }
     except Exception as e:
@@ -410,6 +431,7 @@ def run_comprehensive_forensics(
     ela_path = os.path.join(output_dir, f"{doc_id}_ela.jpg")
     edge_path = os.path.join(output_dir, f"{doc_id}_edges.jpg")
     neural_path = os.path.join(output_dir, f"{doc_id}_neural.jpg")
+    cmfd_path = os.path.join(output_dir, f"{doc_id}_cmfd.jpg")
 
     # Pipeline A: Classical Mathematical Signal Forensics (BSA 2023 Compliant)
     ela_res = compute_ela_heatmap(image_path, ela_path)
@@ -430,7 +452,7 @@ def run_comprehensive_forensics(
         }
         
     meta_res = inspect_metadata_forensics(image_path)
-    cmfd_res = detect_copy_move_forgery(image_path)
+    cmfd_res = detect_copy_move_forgery(image_path, output_cmfd_path=cmfd_path)
 
     # Weighted aggregate score for Pipeline A (Classical Signal Forensics)
     weights = [0.30, 0.30, 0.15, 0.10, 0.15]
@@ -535,6 +557,7 @@ def run_comprehensive_forensics(
         "evidence_list": evidence,
         "ela_heatmap_url": f"/static/forensics/{os.path.basename(ela_path)}",
         "boundary_overlay_url": f"/static/forensics/{os.path.basename(edge_path)}",
-        "neural_heatmap_url": f"/static/forensics/{os.path.basename(neural_path)}"
+        "neural_heatmap_url": f"/static/forensics/{os.path.basename(neural_path)}",
+        "cmfd_overlay_url": f"/static/forensics/{os.path.basename(cmfd_path)}" if os.path.exists(cmfd_path) else None
     }
 

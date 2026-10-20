@@ -34,7 +34,7 @@ from app.modules.validation_engine import (
     cross_validate_mrz_and_viz,
 )
 from app.modules.tampering_engine import run_comprehensive_forensics
-from app.modules.face_engine import verify_faces
+from app.modules.face_engine import verify_faces, cross_verify_qr_portrait
 from app.modules.risk_engine import compute_composite_risk
 from app.modules.qr_engine import extract_and_verify_qr
 from app.modules.watchlist_engine import screen_against_watchlist
@@ -238,6 +238,22 @@ def process_screening_pipeline(
     qr_res = extract_and_verify_qr(doc_path, doc_back_path, viz_fields_data, output_photo_dir=str(FACES_DIR), case_id=case_id)
     validation_res["qr_code"] = qr_res
     validation_res["qr_verification"] = qr_res
+
+    # Tri-Party Biometric Cross-Verification (Document Printed Photo vs UIDAI QR Avatar vs Live Feed)
+    if qr_res.get("embedded_photo_path"):
+        if face_res is None:
+            face_res = {
+                "success": False,
+                "match_score": 0.0,
+                "face_risk": 0.0,
+                "liveness": {"is_live": True, "attack_type": "No live feed"}
+            }
+        cross_verify_qr_portrait(
+            face_res=face_res,
+            qr_photo_path=qr_res["embedded_photo_path"],
+            doc_image_path=doc_path,
+            live_image_path=live_path
+        )
 
 
     # Step 6c: Simulated Interpol Red Notice & Law Enforcement Watchlist Screening

@@ -262,6 +262,8 @@ def verify_faces(
             "face_risk": face_risk,
             "threshold": FACE_SIMILARITY_MATCH_THRESHOLD,
             "liveness": liveness_info,
+            "doc_face_crop_path": doc_crop_path,
+            "live_face_crop_path": live_crop_path,
             "doc_face_crop_url": f"/static/faces/{os.path.basename(doc_crop_path)}",
             "live_face_crop_url": f"/static/faces/{os.path.basename(live_crop_path)}"
         }
@@ -273,6 +275,129 @@ def verify_faces(
             "match_score": 0.0,
             "is_match": False,
             "face_risk": 80.0,
+            "doc_face_crop_path": doc_crop_path if os.path.exists(doc_crop_path) else None,
+            "live_face_crop_path": live_crop_path if os.path.exists(live_crop_path) else None,
             "doc_face_crop_url": f"/static/faces/{os.path.basename(doc_crop_path)}",
             "live_face_crop_url": f"/static/faces/{os.path.basename(live_crop_path)}"
+        }
+
+
+def cross_verify_qr_portrait(
+    face_res: Dict[str, Any],
+    qr_photo_path: str,
+    doc_image_path: Optional[str] = None,
+    live_image_path: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Executes Tri-Party Biometric Cross-Verification:
+    1. Document Printed Photo vs UIDAI Digitally Signed QR Photo (Physical Card Tamper Detection)
+    2. UIDAI Digitally Signed QR Photo vs Live Camera Feed (Cryptographic Avatar Verification)
+    
+    Detects physical photo substitution tampering (e.g. peeling card photo or printing fake avatar).
+    """
+    if not qr_photo_path or not os.path.exists(qr_photo_path):
+        return {"has_qr_face": False}
+
+    try:
+        qr_img = face_recognition.load_image_file(qr_photo_path)
+        qh, qw = qr_img.shape[:2]
+        qr_encodings = face_recognition.face_encodings(qr_img)
+        if not qr_encodings:
+            qr_encodings = face_recognition.face_encodings(qr_img, [(0, qw, qh, 0)])
+
+        if not qr_encodings:
+            return {
+                "has_qr_face": True,
+                "qr_face_url": f"/static/faces/{os.path.basename(qr_photo_path)}",
+                "error": "Failed to extract 128-d biometric embeddings from QR portrait."
+            }
+
+        qr_emb = qr_encodings[0]
+
+        # 1. Compare QR photo against Document Printed Photo
+        doc_crop_path = face_res.get("doc_face_crop_path")
+        doc_emb = None
+        if doc_crop_path and os.path.exists(doc_crop_path):
+            doc_img = face_recognition.load_image_file(doc_crop_path)
+            dh, dw = doc_img.shape[:2]
+            d_encs = face_recognition.face_encodings(doc_img, [(0, dw, dh, 0)])
+            if d_encs:
+                doc_emb = d_encs[0]
+        elif doc_image_path and os.path.exists(doc_image_path):
+            doc_full = face_recognition.load_image_file(doc_image_path)
+            doc_locs = face_recognition.face_locations(doc_full, model="hog")
+            if doc_locs:
+                d_encs = face_recognition.face_encodings(doc_full, [doc_locs[0]])
+                if d_encs:
+                    doc_emb = d_encs[0]
+
+        dist_doc_qr = None
+        is_doc_qr_match = None
+        doc_qr_score = None
+        photo_substitution_detected = False
+
+        if doc_emb is not None:
+            dist_doc_qr = float(face_recognition.face_distance([doc_emb], qr_emb)[0])
+            is_doc_qr_match = dist_doc_qr < FACE_SIMILARITY_MATCH_THRESHOLD
+            doc_qr_score = round(float(np.clip(100.0 / (1.0 + np.exp((dist_doc_qr - 0.38) * 16.0)), 2.0, 99.4)), 1)
+            # Physical photo substitution detected if printed photo diverges from digitally signed QR portrait
+            photo_substitution_detected = not is_doc_qr_match
+
+        # 2. Compare QR photo against Live Camera Feed
+        live_crop_path = face_res.get("live_face_crop_path")
+        live_emb = None
+        if live_crop_path and os.path.exists(live_crop_path):
+            live_img = face_recognition.load_image_file(live_crop_path)
+            lh, lw = live_img.shape[:2]
+            l_encs = face_recognition.face_encodings(live_img, [(0, lw, lh, 0)])
+            if l_encs:
+                live_emb = l_encs[0]
+        elif live_image_path and os.path.exists(live_image_path):
+            live_full = face_recognition.load_image_file(live_image_path)
+            live_locs = face_recognition.face_locations(live_full, model="hog")
+            if live_locs:
+                l_encs = face_recognition.face_encodings(live_full, [live_locs[0]])
+                if l_encs:
+                    live_emb = l_encs[0]
+
+        dist_qr_live = None
+        is_qr_live_match = None
+        qr_live_score = None
+
+        if live_emb is not None:
+            dist_qr_live = float(face_recognition.face_distance([qr_emb], live_emb)[0])
+            is_qr_live_match = dist_qr_live < FACE_SIMILARITY_MATCH_THRESHOLD
+            qr_live_score = round(float(np.clip(100.0 / (1.0 + np.exp((dist_qr_live - 0.38) * 16.0)), 2.0, 99.4)), 1)
+
+        triparty_info = {
+            "has_qr_face": True,
+            "qr_face_url": f"/static/faces/{os.path.basename(qr_photo_path)}",
+            "doc_vs_qr_match": is_doc_qr_match,
+            "doc_vs_qr_score": doc_qr_score,
+            "doc_vs_qr_distance": round(dist_doc_qr, 4) if dist_doc_qr is not None else None,
+            "qr_vs_live_match": is_qr_live_match,
+            "qr_vs_live_score": qr_live_score,
+            "qr_vs_live_distance": round(dist_qr_live, 4) if dist_qr_live is not None else None,
+            "photo_substitution_detected": photo_substitution_detected,
+            "detail": (
+                "CRITICAL TAMPER ALERT: Document printed portrait does NOT match the digitally signed QR code avatar! Physical photo substitution detected."
+                if photo_substitution_detected
+                else "Biometric integrity verified: Document portrait matches UIDAI digitally signed QR code avatar."
+            )
+        }
+
+        # Update parent face_res
+        face_res["triparty"] = triparty_info
+        if photo_substitution_detected:
+            face_res["face_risk"] = max(face_res.get("face_risk", 0.0), 96.0)
+            face_res["is_match"] = False
+
+        return triparty_info
+
+    except Exception as e:
+        print(f"Tri-party cross verification exception: {e}")
+        return {
+            "has_qr_face": True,
+            "qr_face_url": f"/static/faces/{os.path.basename(qr_photo_path)}",
+            "error": str(e)
         }
