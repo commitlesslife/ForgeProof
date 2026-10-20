@@ -655,13 +655,68 @@ export default function CaptureStationPage({ onComplete, onCancel }) {
                   muted 
                   className={`w-full h-full object-cover ${facingMode === 'user' ? 'transform scale-x-[-1]' : ''}`} 
                 />
-                {/* Minimalist Professional Card Alignment Frame */}
-                <div className="absolute inset-0 m-6 sm:m-8 rounded-2xl pointer-events-none border border-white/20">
-                  <div className="absolute top-0 left-0 size-6 border-t-2 border-l-2 border-white/80 rounded-tl-xl" />
-                  <div className="absolute top-0 right-0 size-6 border-t-2 border-r-2 border-white/80 rounded-tr-xl" />
-                  <div className="absolute bottom-0 left-0 size-6 border-b-2 border-l-2 border-white/80 rounded-bl-xl" />
-                  <div className="absolute bottom-0 right-0 size-6 border-b-2 border-r-2 border-white/80 rounded-br-xl" />
-                </div>
+                {/* Advanced Defense-Grade Kiosk Alignment HUD Overlay */}
+                {step === 3 ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-3">
+                    {/* Biometric Oval Mask Guide */}
+                    <div className="relative w-44 h-60 sm:w-52 sm:h-70 rounded-[50%] border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(52,211,153,0.35)] flex items-center justify-center">
+                      {/* Subtle Horizontal Eye Alignment Level */}
+                      <div className="absolute top-[38%] left-2 right-2 border-t border-dashed border-emerald-400/60" />
+                      <span className="absolute top-[33%] right-3 text-[9px] font-mono text-emerald-300 font-bold uppercase tracking-wider bg-black/75 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                        EYE LEVEL
+                      </span>
+
+                      {/* Reticle Crosshair Ticks */}
+                      <div className="absolute top-2 w-3 h-0.5 bg-emerald-400" />
+                      <div className="absolute bottom-2 w-3 h-0.5 bg-emerald-400" />
+                      <div className="absolute left-2 w-0.5 h-3 bg-emerald-400" />
+                      <div className="absolute right-2 w-0.5 h-3 bg-emerald-400" />
+
+                      {/* Live Scanning Sweep */}
+                      <div className="scan-line" />
+                    </div>
+
+                    {/* Kiosk Telemetry Strip */}
+                    <div className="absolute bottom-3 inset-x-3 flex flex-wrap items-center justify-between gap-1 text-[10px] font-mono font-bold text-white bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/80 shadow-md">
+                      <span className="flex items-center gap-1.5 text-emerald-400">
+                        <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                        ISO/IEC 30107-3 PAD ARMED
+                      </span>
+                      <span className="text-slate-300 hidden xs:inline">
+                        PORE LBP · 2D FFT MOIRÉ · YCbCr
+                      </span>
+                      <span className="text-amber-300 bg-amber-950/70 px-1.5 py-0.5 rounded border border-amber-500/30">
+                        LOOK DIRECTLY AT CAMERA
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Document Alignment Frame */
+                  <div className="absolute inset-0 m-4 sm:m-6 rounded-2xl pointer-events-none border border-white/20 flex flex-col justify-between p-2">
+                    <div className="flex justify-between items-start">
+                      <div className="size-6 border-t-2 border-l-2 border-amber-400 rounded-tl-xl shadow-xs" />
+                      <span className="text-[10px] font-mono font-bold text-amber-300 bg-black/75 px-2.5 py-0.5 rounded border border-amber-500/40">
+                        {docType} FRAME GUIDE ({scanSide === 'back' ? 'REVERSE QR' : 'FRONT VIZ'})
+                      </span>
+                      <div className="size-6 border-t-2 border-r-2 border-amber-400 rounded-tr-xl shadow-xs" />
+                    </div>
+
+                    {/* Center Target Indicator */}
+                    <div className="self-center flex items-center justify-center size-8 rounded-full border border-white/20 bg-white/5">
+                      <div className="size-2 rounded-full bg-amber-400/80 animate-ping" />
+                    </div>
+
+                    <div className="flex justify-between items-end">
+                      <div className="size-6 border-b-2 border-l-2 border-amber-400 rounded-bl-xl shadow-xs" />
+                      <div className="bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded text-[10px] font-mono text-white border border-slate-700 shadow-xs flex items-center gap-2">
+                        <span className="text-emerald-400 font-bold">● AUTO-DESKEW ACTIVE</span>
+                        <span className="text-slate-400 hidden sm:inline">|</span>
+                        <span className="text-slate-300 hidden sm:inline">GLARE COMPLIANCE &lt; 3.5%</span>
+                      </div>
+                      <div className="size-6 border-b-2 border-r-2 border-amber-400 rounded-br-xl shadow-xs" />
+                    </div>
+                  </div>
+                )}
 
                 {/* Mobile Camera Flip Button */}
                 <button

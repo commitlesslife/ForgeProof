@@ -1,0 +1,93 @@
+{
+  "timestamp": 1792474595.779791,
+  "total_scenarios": 7,
+  "accuracy_pct": 100.0,
+  "mean_latency_ms": 863.02,
+  "peak_rss_mb": 520.19,
+  "scenarios": [
+    {
+      "id": "scenario1_genuine_passport",
+      "name": "Scenario 1: Authentic Indian Passport",
+      "doc_type": "PASSPORT",
+      "latency_ms": 1047.38,
+      "mem_rss_mb": 508.97,
+      "verdict": "LOW",
+      "expected_verdict": "LOW",
+      "composite_score": 3.2,
+      "passed": true,
+      "case_id": "CASE_PRESET_E1F090"
+    },
+    {
+      "id": "scenario2_photo_splice",
+      "name": "Scenario 2: Boundary Photo Splice Tampering",
+      "doc_type": "PASSPORT",
+      "latency_ms": 860.33,
+      "mem_rss_mb": 518.85,
+      "verdict": "HIGH",
+      "expected_verdict": "HIGH",
+      "composite_score": 75.0,
+      "passed": true,
+      "case_id": "CASE_PRESET_4DDF3F"
+    },
+    {
+      "id": "scenario3_date_fraud",
+      "name": "Scenario 3: Expiry Date Alteration & MRZ Desync",
+      "doc_type": "PASSPORT",
+      "latency_ms": 882.08,
+      "mem_rss_mb": 519.49,
+      "verdict": "HIGH",
+      "expected_verdict": "HIGH",
+      "composite_score": 75.0,
+      "passed": true,
+      "case_id": "CASE_PRESET_B952CA"
+    },
+    {
+      "id": "scenario4_genuine_aadhaar",
+      "name": "Scenario 4: Genuine Indian Aadhaar (Verhoeff Pass)",
+      "doc_type": "AADHAAR",
+      "latency_ms": 769.79,
+      "mem_rss_mb": 519.58,
+      "verdict": "LOW",
+      "expected_verdict": "LOW",
+      "composite_score": 3.2,
+      "passed": true,
+      "case_id": "CASE_PRESET_E515CB"
+    },
+    {
+      "id": "scenario5_tampered_aadhaar",
+      "name": "Scenario 5: Forged Aadhaar (Verhoeff Checksum Fail)",
+      "doc_type": "AADHAAR",
+      "latency_ms": 792.51,
+      "mem_rss_mb": 520.14,
+      "verdict": "HIGH",
+      "expected_verdict": "HIGH",
+      "composite_score": 75.0,
+      "passed": true,
+      "case_id": "CASE_PRESET_A86F9C"
+    },
+    {
+      "id": "scenario1_interpol_hit",
+      "name": "Scenario 6: Interpol Red Notice Wanted Persona",
+      "doc_type": "PASSPORT",
+      "latency_ms": 856.87,
+      "mem_rss_mb": 520.18,
+      "verdict": "CRITICAL",
+      "expected_verdict": "CRITICAL",
+      "composite_score": 100.0,
+      "passed": true,
+      "case_id": "CASE_PRESET_5630EA"
+    },
+    {
+      "id": "scenario7_photo_substitution",
+      "name": "Scenario 7: UIDAI Tri-Party Photo Substitution",
+      "doc_type": "AADHAAR",
+      "latency_ms": 832.18,
+      "mem_rss_mb": 520.19,
+      "verdict": "HIGH",
+      "expected_verdict": "HIGH",
+      "composite_score": 95.0,
+      "passed": true,
+      "case_id": "CASE_PRESET_95E1F5"
+    }
+  ]
+}
