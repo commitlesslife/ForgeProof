@@ -1,6 +1,7 @@
 @echo off
 title ForgeProof Stopper
 color 0C
+cd /d "%~dp0"
 
 echo =====================================================================
 echo                STOPPING FORGEPROOF SERVICES
@@ -20,8 +21,9 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5174" ^| findstr "LISTENING
     taskkill /F /PID %%a >nul 2>&1
 )
 
-echo [*] Terminating Cloudflare Tunnel...
+echo [*] Terminating Tunnels...
 taskkill /F /IM cloudflared.exe >nul 2>&1
+taskkill /F /IM ngrok.exe >nul 2>&1
 
 echo.
 echo All ForgeProof services have been stopped.
